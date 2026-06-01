@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>העלאת המלצה | ממליצה לך בגדול</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">💕 ממליצה לך בגדול</a>
+    <ul class="nav-links">
+      <li><a href="/">בית</a></li>
+      <li><a href="/recommend" class="active">המליצי</a></li>
+      <li><a href="/forum">פורום</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <section class="page-hero">
+      <h1>שתפי המלצה 💌</h1>
+      <p>מצאת פריט שיושב מושלם? שתפי אותנו! ההמלצה שלך תעזור לאלפי נשים להרגיש נהדר.</p>
+    </section>
+
+    <div id="alert-msg" class="alert"></div>
+
+    <form id="recommend-form">
+
+      <!-- Circumference -->
+      <div class="form-card">
+        <h3 style="margin-bottom:1rem">📏 פרטי המידה</h3>
+
+        <div class="form-group">
+          <label class="form-label">היקף חזה <span class="required">*</span></label>
+          <select class="form-control" id="circumference" required>
+            <option value="">בחרי היקף...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">גודל קאפ <span class="required">*</span></label>
+          <select class="form-control" id="cup" required>
+            <option value="">בחרי קאפ...</option>
+            <option value="D">D</option>
+            <option value="DD">DD</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="G">G</option>
+            <option value="H">H</option>
+            <option value="I">I</option>
+            <option value="J">J</option>
+            <option value="K">K</option>
+            <option value="L">L</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">קטגוריית הפריט <span class="required">*</span></label>
+          <select class="form-control" id="category" required>
+            <option value="">בחרי קטגוריה...</option>
+            <option value="חולצות וגופיות">חולצות וגופיות</option>
+            <option value="גוזיות וחולצות ספורט">גוזיות וחולצות ספורט</option>
+            <option value="חזיות">חזיות</option>
+            <option value="שמלות ערב">שמלות ערב</option>
+            <option value="שמלות כלה">שמלות כלה</option>
+            <option value="בגד ים">בגד ים</option>
+            <option value="אחר">אחר</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="form-card">
+        <h3 style="margin-bottom:1rem">🛍️ פרטי המוצר</h3>
+
+        <div class="form-group">
+          <label class="form-label">קישור לפריט <span class="required">*</span></label>
+          <input type="url" class="form-control" id="link" placeholder="https://... (קישור ישיר לפריט)" />
+          <div class="form-hint">או שם החנות / שם הפריט</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">שם חנות</label>
+          <input type="text" class="form-control" id="store" placeholder="למשל: ASOS, זארה, ויקטוריה סיקרט..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">מאפיינים מיוחדים</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="features" value="פתוח/חשוף" /> פתוח/חשוף
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="features" value="מחזיק במיוחד" /> מחזיק במיוחד
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">תיאור חופשי (אופציונלי)</label>
+          <textarea class="form-control" id="description"
+            placeholder="חוויית לבישה, נוחות, בד, טיפים כלליים..."></textarea>
+        </div>
+      </div>
+
+      <!-- Image Upload + Blur Tool -->
+      <div class="form-card">
+        <h3 style="margin-bottom:0.5rem">📷 תמונה (אופציונלי)</h3>
+        <p style="font-size:0.88rem;color:var(--color-muted);margin-bottom:1rem">
+          ניתן לטשטש פנים לפני השליחה בעזרת הכלי המובנה.
+        </p>
+
+        <div class="form-group">
+          <input type="file" id="image-input" accept="image/*" class="form-control" style="padding:0.5rem" />
+        </div>
+
+        <div id="canvas-wrap" style="display:none">
+          <div class="blur-tool-wrap">
+            <canvas id="imageCanvas"></canvas>
+          </div>
+          <div class="blur-tool-actions">
+            <button type="button" class="btn btn-outline" id="btn-blur" style="font-size:0.88rem">
+              🖊️ ציירי לטשטוש
+            </button>
+            <input type="range" id="brush-size" min="10" max="80" value="30"
+              title="גודל מברשת" style="width:100px;accent-color:var(--color-accent)" />
+            <button type="button" class="btn btn-outline" id="btn-reset-canvas" style="font-size:0.88rem">
+              🔄 איפוס תמונה
+            </button>
+          </div>
+          <p style="font-size:0.8rem;color:var(--color-muted);margin-top:0.4rem">
+            גרורי את האצבע/עכבר על הפנים כדי לטשטש
+          </p>
+        </div>
+      </div>
+
+      <!-- Anonymity & Email -->
+      <div class="form-card">
+        <h3 style="margin-bottom:1rem">🔒 פרטיות</h3>
+
+        <div class="form-group">
+          <label class="checkbox-label" style="font-size:1rem;font-weight:600">
+            <input type="checkbox" id="is-anonymous" />
+            העלאה בעילום שם (אנונימי)
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">כתובת מייל</label>
+          <input type="email" class="form-control" id="email"
+            placeholder="your@email.com" />
+          <div class="form-hint">לצורכי אימות בלבד — לא יפורסם לעולם 🔒</div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;font-size:1.1rem;padding:0.9rem">
+        💕 שלחי המלצה
+      </button>
+
+    </form>
+
+  </main>
+
+  <footer>
+    <p>💕 ממליצה לך בגדול | <a href="mailto:contact.mamlicha@gmail.com">contact.mamlicha@gmail.com</a></p>
+  </footer>
+
+  <div id="chatbot-bubble">
+    <div id="chatbot-window" class="hidden"></div>
+    <button id="chatbot-toggle" title="שוחחי עם רוני הסטייליסטית שלך">💬</button>
+  </div>
+
+  <script src="/js/recommend.js"></script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>

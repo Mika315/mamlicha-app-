@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ממליצה לך בגדול 💕</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">💕 ממליצה לך בגדול</a>
+    <ul class="nav-links">
+      <li><a href="/" class="active">בית</a></li>
+      <li><a href="/recommend">המליצי</a></li>
+      <li><a href="/forum">פורום</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+
+    <!-- HERO -->
+    <section class="page-hero">
+      <h1>היי, איזה כיף שאת כאן! ✨</h1>
+      <p>
+        מי כמונו יודעת כמה זה מורכב למצוא פריטי לבוש שיושבים בול על חזה גדול.
+        <strong>'ממליצה לך בגדול'</strong> נולד כדי לשנות את זה – מרחב קהילתי שבו אנחנו חולקות המלצות
+        אמינות, חוסכות אכזבות, ומזכירות אחת לשנייה שמגיע לנו להרגיש בטוחות, נינוחות ומהממות בכל בגד.
+      </p>
+      <p style="margin-top:0.75rem;font-size:0.88rem;color:var(--color-muted)">
+        🛠️ זה אתר שעובר שדרוגים כל יום. אשמח לשמוע ביקורות והמלצות:
+        <a href="mailto:contact.mamlicha@gmail.com" style="color:var(--color-accent);font-weight:600">contact.mamlicha@gmail.com</a>
+      </p>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="filter-section">
+      <h3>🔍 סינון המלצות</h3>
+
+      <!-- Circumference -->
+      <div class="form-group">
+        <label class="form-label">היקף חזה (ס"מ)</label>
+        <div class="chip-group" id="filter-circumference">
+          <button class="chip all-chip active" data-value="all">הכל</button>
+        </div>
+      </div>
+
+      <!-- Cup -->
+      <div class="form-group">
+        <label class="form-label">גודל קאפ</label>
+        <div class="chip-group" id="filter-cup">
+          <button class="chip all-chip active" data-value="all">הכל</button>
+          <button class="chip" data-value="D">D</button>
+          <button class="chip" data-value="DD">DD</button>
+          <button class="chip" data-value="E">E</button>
+          <button class="chip" data-value="F">F</button>
+          <button class="chip" data-value="G">G</button>
+          <button class="chip" data-value="H">H</button>
+          <button class="chip" data-value="I">I</button>
+          <button class="chip" data-value="J">J</button>
+          <button class="chip" data-value="K">K</button>
+          <button class="chip" data-value="L">L</button>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="form-group">
+        <label class="form-label">קטגוריה</label>
+        <div class="chip-group" id="filter-category">
+          <button class="chip all-chip active" data-value="all">הכל</button>
+          <button class="chip" data-value="חולצות וגופיות">חולצות וגופיות</button>
+          <button class="chip" data-value="גוזיות וחולצות ספורט">גוזיות ספורט</button>
+          <button class="chip" data-value="חזיות">חזיות</button>
+          <button class="chip" data-value="שמלות ערב">שמלות ערב</button>
+          <button class="chip" data-value="שמלות כלה">שמלות כלה</button>
+          <button class="chip" data-value="בגד ים">בגד ים</button>
+          <button class="chip" data-value="אחר">אחר</button>
+        </div>
+      </div>
+
+      <!-- Special Features -->
+      <div class="form-group">
+        <label class="form-label">מאפיינים מיוחדים</label>
+        <div class="chip-group" id="filter-features">
+          <button class="chip all-chip active" data-value="all">הכל</button>
+          <button class="chip" data-value="פתוח/חשוף">פתוח/חשוף</button>
+          <button class="chip" data-value="מחזיק במיוחד">מחזיק במיוחד</button>
+        </div>
+      </div>
+
+      <!-- Free text search -->
+      <div class="search-input-wrap">
+        <input type="text" id="search-q" class="search-input" placeholder="🔍 חיפוש חופשי (שם חנות, תיאור...)">
+      </div>
+
+      <button class="btn btn-primary" id="btn-search" style="width:100%">
+        ✨ מצאי לי המלצות
+      </button>
+    </section>
+
+    <!-- RESULTS -->
+    <div id="results-container">
+      <div class="loading-state" id="results-loading" style="display:none">טוענת...</div>
+      <div id="results-grid" class="cards-grid"></div>
+      <div id="results-empty" class="empty-state" style="display:none">
+        <div class="emoji">🔍</div>
+        <p>לא נמצאו המלצות לפילטרים שבחרת.<br>נסי סינון אחר או <a href="/recommend" style="color:var(--color-accent);font-weight:600">הוסיפי המלצה ראשונה!</a></p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>💕 ממליצה לך בגדול | קהילה לנשים בעלות חזה גדול</p>
+    <p><a href="mailto:contact.mamlicha@gmail.com">contact.mamlicha@gmail.com</a></p>
+  </footer>
+
+  <!-- CHATBOT -->
+  <div id="chatbot-bubble">
+    <div id="chatbot-window" class="hidden"></div>
+    <button id="chatbot-toggle" title="שוחחי עם רוני הסטייליסטית שלך">💬</button>
+  </div>
+
+  <script src="/js/search.js"></script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "mamlicha",
+  "version": "1.0.0",
+  "description": "Mamlicha - clothing recommendations community for women with large busts",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@langchain/community": "^1.1.28",
+    "@langchain/core": "^1.1.48",
+    "@langchain/google-genai": "^2.1.31",
+    "@langchain/mongodb": "^1.2.1",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.5.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "langchain": "^1.4.2",
+    "mongoose": "^8.7.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^8.0.9"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

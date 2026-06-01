@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>פורום | ממליצה לך בגדול</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">💕 ממליצה לך בגדול</a>
+    <ul class="nav-links">
+      <li><a href="/">בית</a></li>
+      <li><a href="/recommend">המליצי</a></li>
+      <li><a href="/forum" class="active">פורום</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+
+    <section class="page-hero">
+      <h1>הפורום הקהילתי 💬</h1>
+      <p>שאלי, ייעצי, שתפי — הפורום שלנו פתוח לכולן. אפשר לפרסם בעילום שם.</p>
+    </section>
+
+    <!-- New post form -->
+    <div class="form-card" id="new-post-form-wrap">
+      <h3 style="margin-bottom:1rem">➕ פוסט חדש</h3>
+      <div id="forum-alert" class="alert"></div>
+      <form id="forum-post-form">
+        <div class="form-group">
+          <input type="text" class="form-control" id="post-title"
+            placeholder="כותרת השאלה / הנושא..." required />
+        </div>
+        <div class="form-group">
+          <textarea class="form-control" id="post-body" rows="3"
+            placeholder="למשל: איפה מוצאים חזיית סטרפלס למידה G שלא נופלת? 😭"></textarea>
+        </div>
+
+        <!-- Image upload with blur -->
+        <div class="form-group">
+          <input type="file" id="forum-image-input" accept="image/*" class="form-control" style="padding:0.5rem" />
+        </div>
+        <div id="forum-canvas-wrap" style="display:none;margin-bottom:0.75rem">
+          <canvas id="forumImageCanvas" style="border-radius:var(--radius-sm);border:2px solid var(--color-border);max-width:100%;cursor:crosshair"></canvas>
+          <div class="blur-tool-actions">
+            <input type="range" id="forum-brush-size" min="10" max="80" value="30"
+              title="גודל מברשת" style="width:100px;accent-color:var(--color-accent)" />
+            <button type="button" class="btn btn-outline" id="forum-btn-reset" style="font-size:0.85rem">🔄 איפוס</button>
+          </div>
+        </div>
+
+        <div class="checkbox-group" style="margin-bottom:0.75rem">
+          <label class="checkbox-label">
+            <input type="checkbox" id="post-anonymous" /> פרסמי בעילום שם
+          </label>
+        </div>
+        <div class="form-group" id="post-name-wrap">
+          <input type="text" class="form-control" id="post-display-name"
+            placeholder="השם שיוצג (אופציונלי)..." />
+        </div>
+        <div class="form-group">
+          <input type="email" class="form-control" id="post-email"
+            placeholder="מייל לצורכי אימות בלבד — לא יפורסם 🔒" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">
+          💌 פרסמי פוסט
+        </button>
+      </form>
+    </div>
+
+    <!-- Posts list -->
+    <div id="forum-loading" class="loading-state" style="display:none">טוענת פוסטים...</div>
+    <div id="forum-posts"></div>
+    <div id="forum-empty" class="empty-state" style="display:none">
+      <div class="emoji">💬</div>
+      <p>עדיין אין פוסטים. היי הראשונה לפרסם!</p>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>💕 ממליצה לך בגדול | <a href="mailto:contact.mamlicha@gmail.com">contact.mamlicha@gmail.com</a></p>
+  </footer>
+
+  <div id="chatbot-bubble">
+    <div id="chatbot-window" class="hidden"></div>
+    <button id="chatbot-toggle" title="שוחחי עם רוני הסטייליסטית שלך">💬</button>
+  </div>
+
+  <script src="/js/forum.js"></script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>
