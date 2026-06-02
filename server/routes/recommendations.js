@@ -95,7 +95,7 @@ router.post('/', async (req, res) => {
 
     // Send admin email (non-blocking)
     sendRecommendationEmail(rec).catch(err =>
-      console.error('Failed to send recommendation email:', err.message)
+      console.error('Failed to send recommendation email:', err)
     );
 
     const saved = rec.toObject();

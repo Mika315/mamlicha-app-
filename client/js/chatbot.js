@@ -14,9 +14,10 @@
     'אחר'
   ];
 
-  // State
+  // State — store each step's answer so we can build one combined message
   let isOpen = false;
-  let conversationHistory = []; // { role: 'user'|'assistant', content: string }
+  let selectedCategory = '';
+  let selectedSize = '';
   let step = 'greeting'; // greeting → category → size → preferences → results
 
   // DOM
@@ -47,20 +48,14 @@
   toggleBtn.addEventListener('click', () => {
     isOpen = !isOpen;
     windowEl.classList.toggle('hidden', !isOpen);
-    if (isOpen && conversationHistory.length === 0) {
+    if (isOpen && step === 'greeting') {
       startGreeting();
     }
   });
 
-  // Send on button click
   document.getElementById('chat-send').addEventListener('click', sendMessage);
-
-  // Send on Enter
   document.getElementById('chat-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
 
   // ============ GREETING ============
@@ -83,8 +78,8 @@
       btn.textContent = cat;
       btn.addEventListener('click', () => {
         clearQuickBtns();
+        selectedCategory = cat;
         addUserMessage(cat);
-        conversationHistory.push({ role: 'user', content: cat });
         step = 'size';
         setTimeout(() => {
           addBotMessage('מה המידה שלך? 📏\nלדוגמה: "היקף 90, קאפ F"');
@@ -101,11 +96,10 @@
     if (!msg) return;
     input.value = '';
     clearQuickBtns();
-
     addUserMessage(msg);
-    conversationHistory.push({ role: 'user', content: msg });
 
     if (step === 'size') {
+      selectedSize = msg;
       step = 'preferences';
       setTimeout(() => {
         addBotMessage('תודה! ספרי לי עוד – סגנון, רמת תמיכה, תקציב, העדפות בד... 🌸');
@@ -115,45 +109,50 @@
 
     if (step === 'preferences') {
       step = 'results';
-    }
+      // Build ONE combined message so Gemini gets a clean single-turn request
+      const combinedMessage =
+        `אני מחפשת פריט מקטגוריה: ${selectedCategory}. ` +
+        `המידה שלי היא: ${selectedSize}. ` +
+        `העדפות נוספות: ${msg}. ` +
+        `אנא תני לי המלצות מותאמות אישית בעברית.`;
 
-    // Call AI backend
-    addTypingIndicator();
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          history: conversationHistory.slice(0, -1),
-          message: msg
-        })
-      });
-      const data = await res.json();
-      removeTypingIndicator();
-
-      const reply = data.success ? data.reply : 'מצטערת, הייתה שגיאה. נסי שוב 🙏';
-      conversationHistory.push({ role: 'assistant', content: reply });
-      addBotMessage(reply);
-
-      // Offer to continue
-      setTimeout(() => {
-        const btnContainer = document.getElementById('chat-quick-btns');
-        btnContainer.innerHTML = '';
-        const continueBtn = document.createElement('button');
-        continueBtn.className = 'chat-quick-btn';
-        continueBtn.textContent = '🔄 חיפוש חדש';
-        continueBtn.addEventListener('click', () => {
-          clearQuickBtns();
-          conversationHistory = [];
-          step = 'category';
-          addBotMessage('כמובן! מה את מחפשת הפעם? 💕');
-          showCategoryButtons();
+      addTypingIndicator();
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            history: [],        // no prior history — one clean combined message
+            message: combinedMessage
+          })
         });
-        btnContainer.appendChild(continueBtn);
-      }, 800);
-    } catch (err) {
-      removeTypingIndicator();
-      addBotMessage('אופס! נראה שיש בעיה בחיבור לשרת. נסי שוב בעוד רגע 🙏');
+        const data = await res.json();
+        removeTypingIndicator();
+
+        const reply = data.success ? data.reply : 'מצטערת, הייתה שגיאה. נסי שוב 🙏';
+        addBotMessage(reply);
+
+        // Offer new search
+        setTimeout(() => {
+          const btnContainer = document.getElementById('chat-quick-btns');
+          btnContainer.innerHTML = '';
+          const continueBtn = document.createElement('button');
+          continueBtn.className = 'chat-quick-btn';
+          continueBtn.textContent = '🔄 חיפוש חדש';
+          continueBtn.addEventListener('click', () => {
+            clearQuickBtns();
+            selectedCategory = '';
+            selectedSize = '';
+            step = 'category';
+            addBotMessage('כמובן! מה את מחפשת הפעם? 💕');
+            showCategoryButtons();
+          });
+          btnContainer.appendChild(continueBtn);
+        }, 800);
+      } catch (err) {
+        removeTypingIndicator();
+        addBotMessage('אופס! נראה שיש בעיה בחיבור לשרת. נסי שוב בעוד רגע 🙏');
+      }
     }
   }
 
@@ -193,8 +192,8 @@
   }
 
   function clearQuickBtns() {
-    const btnContainer = document.getElementById('chat-quick-btns');
-    if (btnContainer) btnContainer.innerHTML = '';
+    const c = document.getElementById('chat-quick-btns');
+    if (c) c.innerHTML = '';
   }
 
   function escHtml(str) {

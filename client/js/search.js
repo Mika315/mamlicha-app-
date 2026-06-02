@@ -15,6 +15,22 @@
     }
   }
 
+  // ============ LIGHTBOX ============
+  const lightbox = document.createElement('div');
+  lightbox.id = 'img-lightbox';
+  lightbox.style.cssText = `
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    z-index:9999; align-items:center; justify-content:center; cursor:zoom-out;
+  `;
+  lightbox.innerHTML = `<img id="img-lightbox-img" style="max-width:92vw;max-height:92vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);" />`;
+  document.body.appendChild(lightbox);
+  lightbox.addEventListener('click', () => { lightbox.style.display = 'none'; });
+
+  function openLightbox(src) {
+    document.getElementById('img-lightbox-img').src = src;
+    lightbox.style.display = 'flex';
+  }
+
   // Active filters state
   const filters = {
     circumference: [],
@@ -33,12 +49,10 @@
       const val = chip.dataset.value;
 
       if (val === 'all') {
-        // Deactivate all, activate "all"
         group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         filters[filterKey] = [];
       } else {
-        // Deactivate "all" chip
         const allChip = group.querySelector('[data-value="all"]');
         if (allChip) allChip.classList.remove('active');
 
@@ -46,7 +60,6 @@
         const activeVals = [...group.querySelectorAll('.chip.active')].map(c => c.dataset.value);
         filters[filterKey] = activeVals;
 
-        // If nothing active, re-activate "all"
         if (filters[filterKey].length === 0 && allChip) {
           allChip.classList.add('active');
         }
@@ -59,11 +72,8 @@
   setupChipGroup('filter-category', 'category');
   setupChipGroup('filter-features', 'features');
 
-  // Search button
   const btnSearch = document.getElementById('btn-search');
   if (btnSearch) btnSearch.addEventListener('click', fetchRecommendations);
-
-  // Also fetch on load
   fetchRecommendations();
 
   async function fetchRecommendations() {
@@ -109,16 +119,37 @@
     const date = new Date(rec.createdAt).toLocaleDateString('he-IL');
     const user = rec.isAnonymous ? 'משתמשת אנונימית' : 'חברת הקהילה';
 
+    // Build image HTML — clickable thumbnail that opens lightbox
+    const imgHtml = rec.imageUrl
+      ? `<img
+          class="rec-card-img"
+          src="${escHtml(rec.imageUrl)}"
+          alt="תמונת פריט"
+          loading="lazy"
+          title="לחצי להגדלה"
+          style="cursor:zoom-in"
+          data-src="${escHtml(rec.imageUrl)}"
+        />`
+      : '';
+
     card.innerHTML = `
       <span class="rec-card-tag">${escHtml(rec.category)}</span>
       <div class="rec-card-size">היקף ${rec.circumference} | קאפ ${escHtml(rec.cup)}</div>
-      ${rec.imageUrl ? `<img class="rec-card-img" src="${escHtml(rec.imageUrl)}" alt="תמונת פריט" loading="lazy" />` : ''}
+      ${imgHtml}
       ${rec.store ? `<div class="rec-card-store">🏪 ${escHtml(rec.store)}</div>` : ''}
       ${rec.description ? `<div class="rec-card-desc">${escHtml(rec.description)}</div>` : ''}
       ${rec.features && rec.features.length ? `<div style="font-size:0.82rem;color:var(--color-accent)">✨ ${rec.features.map(escHtml).join(' | ')}</div>` : ''}
       ${rec.link ? `<a class="rec-card-link" href="${escHtml(rec.link)}" target="_blank" rel="noopener">🔗 לצפייה בפריט</a>` : ''}
       <div class="rec-card-footer">${user} • ${date}</div>
     `;
+
+    // Wire up lightbox click on the image
+    if (rec.imageUrl) {
+      card.querySelector('.rec-card-img').addEventListener('click', () => {
+        openLightbox(rec.imageUrl);
+      });
+    }
+
     return card;
   }
 

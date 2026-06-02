@@ -113,14 +113,28 @@
         // Upload image if exists
         let imageUrl = '';
         if (canvas && canvasWrap.style.display !== 'none') {
-          const base64 = canvas.toDataURL('image/jpeg', 0.85);
-          const uploadRes = await fetch('/api/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: base64, folder: 'mamlicha/recommendations' })
-          });
-          const uploadData = await uploadRes.json();
-          if (uploadData.success) imageUrl = uploadData.url;
+          try {
+            const base64 = canvas.toDataURL('image/jpeg', 0.85);
+            const uploadRes = await fetch('/api/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image: base64, folder: 'mamlicha/recommendations' })
+            });
+            const uploadData = await uploadRes.json();
+            if (uploadData.success) {
+              imageUrl = uploadData.url;
+            } else {
+              showAlert(alertEl, 'error', '⚠️ העלאת התמונה נכשלה: ' + (uploadData.message || 'שגיאה לא ידועה') + ' — ניתן לשלוח ללא תמונה.');
+              submitBtn.disabled = false;
+              submitBtn.textContent = '💕 שלחי המלצה';
+              return;
+            }
+          } catch (uploadErr) {
+            showAlert(alertEl, 'error', '⚠️ שגיאה בהעלאת התמונה. בדקי את חיבור האינטרנט ונסי שוב.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '💕 שלחי המלצה';
+            return;
+          }
         }
 
         const features = [...document.querySelectorAll('input[name="features"]:checked')].map(cb => cb.value);
