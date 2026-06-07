@@ -3,7 +3,7 @@ const router = express.Router();
 const Recommendation = require('../models/Recommendation');
 const ForumPost = require('../models/ForumPost');
 
-// ─── Auth middleware ────────────────────────────────────────────────────────
+// --- Auth middleware ---
 function requireAdmin(req, res, next) {
   const pwd = req.headers['x-admin-password'];
   if (!process.env.ADMIN_PASSWORD || pwd !== process.env.ADMIN_PASSWORD) {
@@ -12,7 +12,7 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// ─── Login ──────────────────────────────────────────────────────────────────
+// --- Login ---
 router.post('/login', (req, res) => {
   const { password } = req.body;
   if (!password || password !== process.env.ADMIN_PASSWORD) {
@@ -21,7 +21,7 @@ router.post('/login', (req, res) => {
   res.json({ success: true });
 });
 
-// ─── Data routes ─────────────────────────────────────────────────────────────
+// --- Data routes ---
 router.get('/data/recommendations', requireAdmin, async (req, res) => {
   try {
     const recs = await Recommendation.find()
@@ -76,7 +76,7 @@ router.delete('/data/forum/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// ─── Email-link delete routes (token-based, from email) ──────────────────────
+// --- Email-link delete routes (token-based, from email) ---
 const SUCCESS_HTML = `<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -114,7 +114,21 @@ router.get('/delete/forum/:id', async (req, res) => {
   }
 });
 
-// ─── Test email ───────────────────────────────────────────────────────────────
+// --- Test email ---
 router.get('/test-email', async (req, res) => {
   try {
-    const { sendRecommendationEmail } = require('.
+    const { sendRecommendationEmail } = require('../services/email');
+    await sendRecommendationEmail({
+      _id: 'TEST123', circumference: 90, cup: 'F', category: 'חזיות',
+      store: 'בדיקה', link: 'https://example.com', features: ['מחזיק במיוחד'],
+      description: 'המלצת בדיקה', imageUrl: '', isAnonymous: false,
+      createdAt: new Date(), deleteToken: 'test-token-123'
+    });
+    res.send('<h2>✅ מייל בדיקה נשלח בהצלחה!</h2>');
+  } catch (err) {
+    const detail = err.response ? JSON.stringify(err.response.body, null, 2) : err.stack;
+    res.status(500).send('<h2>❌ שגיאה:</h2><pre>' + err.message + '\n\n' + detail + '</pre>');
+  }
+});
+
+module.exports = router;
