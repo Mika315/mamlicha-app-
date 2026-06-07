@@ -21,7 +21,6 @@ app.use(express.static(path.join(__dirname, '../client')));
 // API Routes
 app.use('/api/recommendations', require('./routes/recommendations'));
 app.use('/api/forum', require('./routes/forum'));
-app.use('/api/chat', require('./routes/chat'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/admin', require('./routes/admin'));
 
