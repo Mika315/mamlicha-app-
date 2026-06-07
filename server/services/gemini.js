@@ -10,7 +10,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * Generate a text embedding vector for RAG.
  */
 async function generateEmbedding(text) {
-  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+  const model = genAI.getGenerativeModel({ model: 'text-embedding-005' });
   const result = await model.embedContent(text);
   return result.embedding.values;
 }
@@ -20,7 +20,7 @@ async function generateEmbedding(text) {
  * All context is embedded directly in the prompt.
  */
 async function generateChatResponse(history, userMessage, contextText = '') {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
   const systemPrompt = `את "רוני", סטייליסטית אישית ועוזרת חכמה באתר הקהילה "ממליצה לך בגדול".
 האתר מיועד לנשים ונערות בעלות חזה גדול (מידות D עד L).
