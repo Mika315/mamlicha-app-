@@ -10,8 +10,76 @@
   const forumCanvasWrap = document.getElementById('forum-canvas-wrap');
   const forumCanvas = document.getElementById('forumImageCanvas');
   const forumCtx = forumCanvas ? forumCanvas.getContext('2d') : null;
-  let forumOriginalImage = null;
+  let forumOrigCanvas = null;
+  let forumBlurCanvas = null;
   let isDrawing = false;
+
+  function makeOffscreen(w, h) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    return c;
+  }
+
+  function getForumBrushSize() {
+    return parseInt(document.getElementById('forum-brush-size')?.value || 30);
+  }
+
+  function forumRenderCanvas(showCursor, cx, cy) {
+    if (!forumCtx || !forumBlurCanvas) return;
+    forumCtx.clearRect(0, 0, forumCanvas.width, forumCanvas.height);
+    forumCtx.drawImage(forumBlurCanvas, 0, 0);
+    if (showCursor) {
+      const r = getForumBrushSize();
+      forumCtx.beginPath();
+      forumCtx.arc(cx, cy, r, 0, Math.PI * 2);
+      forumCtx.strokeStyle = 'rgba(231,84,128,0.85)';
+      forumCtx.lineWidth = 2;
+      forumCtx.setLineDash([5, 4]);
+      forumCtx.stroke();
+      forumCtx.setLineDash([]);
+    }
+  }
+
+  function forumApplyBlurAt(x, y) {
+    if (!forumOrigCanvas || !forumBlurCanvas) return;
+    const r = getForumBrushSize();
+    const blurPx = 14;
+    const pad = blurPx * 3;
+
+    const bx = Math.max(0, Math.floor(x - r));
+    const by = Math.max(0, Math.floor(y - r));
+    const bw = Math.min(r * 2, forumBlurCanvas.width - bx);
+    const bh = Math.min(r * 2, forumBlurCanvas.height - by);
+    if (bw <= 0 || bh <= 0) return;
+
+    const sx = Math.max(0, bx - pad);
+    const sy = Math.max(0, by - pad);
+    const sw = Math.min(bw + pad * 2, forumOrigCanvas.width - sx);
+    const sh = Math.min(bh + pad * 2, forumOrigCanvas.height - sy);
+
+    const tmp = makeOffscreen(sw, sh);
+    const tCtx = tmp.getContext('2d');
+    tCtx.filter = `blur(${blurPx}px)`;
+    tCtx.drawImage(forumOrigCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
+    tCtx.filter = 'none';
+
+    const bCtx = forumBlurCanvas.getContext('2d');
+    bCtx.save();
+    bCtx.beginPath();
+    bCtx.arc(x, y, r, 0, Math.PI * 2);
+    bCtx.clip();
+    bCtx.drawImage(tmp, bx - sx, by - sy, bw, bh, bx, by, bw, bh);
+    bCtx.restore();
+  }
+
+  function getPos(cvs, e) {
+    const rect = cvs.getBoundingClientRect();
+    const scaleX = cvs.width / rect.width;
+    const scaleY = cvs.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
 
   if (forumImageInput) {
     forumImageInput.addEventListener('change', (e) => {
@@ -21,12 +89,20 @@
       reader.onload = (ev) => {
         const img = new Image();
         img.onload = () => {
-          forumOriginalImage = img;
           const maxW = Math.min(window.innerWidth - 60, 500);
           const scale = Math.min(maxW / img.width, 350 / img.height, 1);
-          forumCanvas.width = img.width * scale;
-          forumCanvas.height = img.height * scale;
-          forumCtx.drawImage(img, 0, 0, forumCanvas.width, forumCanvas.height);
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+
+          forumCanvas.width = w; forumCanvas.height = h;
+
+          forumOrigCanvas = makeOffscreen(w, h);
+          forumOrigCanvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+          forumBlurCanvas = makeOffscreen(w, h);
+          forumBlurCanvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+          forumRenderCanvas(false);
           forumCanvasWrap.style.display = 'block';
         };
         img.src = ev.target.result;
@@ -35,43 +111,44 @@
     });
   }
 
-  function getPos(canvas, e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-  }
-
-  function applyBlur(canvas, ctx, x, y, brushSize) {
-    const r = brushSize;
-    const x0 = Math.max(0, x - r);
-    const y0 = Math.max(0, y - r);
-    const w = Math.min(r * 2, canvas.width - x0);
-    const h = Math.min(r * 2, canvas.height - y0);
-    ctx.save();
-    ctx.filter = 'blur(12px)';
-    ctx.drawImage(canvas, x0, y0, w, h, x0, y0, w, h);
-    ctx.restore();
-  }
-
   if (forumCanvas) {
-    const bs = () => parseInt(document.getElementById('forum-brush-size')?.value || 30);
-    forumCanvas.addEventListener('mousedown', (e) => { isDrawing = true; const p = getPos(forumCanvas, e); applyBlur(forumCanvas, forumCtx, p.x, p.y, bs()); });
-    forumCanvas.addEventListener('mousemove', (e) => { if (isDrawing) { const p = getPos(forumCanvas, e); applyBlur(forumCanvas, forumCtx, p.x, p.y, bs()); } });
-    forumCanvas.addEventListener('mouseup', () => { isDrawing = false; });
-    forumCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; const p = getPos(forumCanvas, e); applyBlur(forumCanvas, forumCtx, p.x, p.y, bs()); }, { passive: false });
-    forumCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (isDrawing) { const p = getPos(forumCanvas, e); applyBlur(forumCanvas, forumCtx, p.x, p.y, bs()); } }, { passive: false });
-    forumCanvas.addEventListener('touchend', () => { isDrawing = false; });
+    forumCanvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      const p = getPos(forumCanvas, e);
+      forumApplyBlurAt(p.x, p.y);
+      forumRenderCanvas(true, p.x, p.y);
+    });
+    forumCanvas.addEventListener('mousemove', (e) => {
+      const p = getPos(forumCanvas, e);
+      if (isDrawing) forumApplyBlurAt(p.x, p.y);
+      forumRenderCanvas(true, p.x, p.y);
+    });
+    forumCanvas.addEventListener('mouseup', () => { isDrawing = false; forumRenderCanvas(false); });
+    forumCanvas.addEventListener('mouseleave', () => { isDrawing = false; forumRenderCanvas(false); });
+
+    forumCanvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isDrawing = true;
+      const p = getPos(forumCanvas, e);
+      forumApplyBlurAt(p.x, p.y);
+      forumRenderCanvas(true, p.x, p.y);
+    }, { passive: false });
+    forumCanvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const p = getPos(forumCanvas, e);
+      if (isDrawing) forumApplyBlurAt(p.x, p.y);
+      forumRenderCanvas(true, p.x, p.y);
+    }, { passive: false });
+    forumCanvas.addEventListener('touchend', () => { isDrawing = false; forumRenderCanvas(false); });
   }
 
   const forumBtnReset = document.getElementById('forum-btn-reset');
   if (forumBtnReset) {
     forumBtnReset.addEventListener('click', () => {
-      if (forumOriginalImage && forumCtx) {
-        forumCtx.clearRect(0, 0, forumCanvas.width, forumCanvas.height);
-        forumCtx.drawImage(forumOriginalImage, 0, 0, forumCanvas.width, forumCanvas.height);
+      if (forumOrigCanvas && forumBlurCanvas) {
+        forumBlurCanvas.getContext('2d').clearRect(0, 0, forumBlurCanvas.width, forumBlurCanvas.height);
+        forumBlurCanvas.getContext('2d').drawImage(forumOrigCanvas, 0, 0);
+        forumRenderCanvas(false);
       }
     });
   }
@@ -104,10 +181,10 @@
       submitBtn.textContent = 'שולחת...';
 
       try {
-        // Upload image if exists
+        // Upload image if exists (export from blurCanvas — no cursor artifact)
         let imageUrl = '';
-        if (forumCanvas && forumCanvasWrap.style.display !== 'none') {
-          const base64 = forumCanvas.toDataURL('image/jpeg', 0.85);
+        if (forumBlurCanvas && forumCanvasWrap.style.display !== 'none') {
+          const base64 = forumBlurCanvas.toDataURL('image/jpeg', 0.85);
           const uploadRes = await fetch('/api/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -206,68 +283,4 @@
             </label>
             <input type="text" class="form-control reply-name" placeholder="שם (אופציונלי)" style="max-width:180px;padding:0.4rem 0.7rem;font-size:0.85rem" />
           </div>
-          <button type="submit" class="btn btn-primary" style="font-size:0.85rem;padding:0.5rem 1rem">שלחי</button>
-        </form>
-      </div>
-    `;
-
-    // Toggle reply form
-    el.querySelector('.toggle-reply-btn').addEventListener('click', () => {
-      const form = el.querySelector(`#reply-form-${post._id}`);
-      form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    });
-
-    // Submit reply
-    el.querySelector(`#reply-form-${post._id}`).addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const body = form.querySelector('textarea').value.trim();
-      const isAnon = form.querySelector('.reply-anon').checked;
-      const displayName = form.querySelector('.reply-name').value.trim();
-      if (!body) return;
-
-      try {
-        const res = await fetch(`/api/forum/${post._id}/reply`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ body, isAnonymous: isAnon, displayName })
-        });
-        const data = await res.json();
-        if (data.success) {
-          const repliesContainer = el.querySelector(`#replies-${post._id}`);
-          repliesContainer.insertAdjacentHTML('beforeend', buildReplyHtml(data.data));
-          form.reset();
-          form.style.display = 'none';
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    });
-
-    return el;
-  }
-
-  function buildReplyHtml(reply) {
-    const date = new Date(reply.createdAt).toLocaleDateString('he-IL');
-    const name = reply.isAnonymous ? 'אנונימית' : (reply.displayName || 'אנונימית');
-    return `<div class="reply">
-      <div class="reply-meta">${escHtml(name)} • ${date}</div>
-      <div>${escHtml(reply.body)}</div>
-    </div>`;
-  }
-
-  function showAlert(el, type, msg) {
-    if (!el) return;
-    el.className = 'alert' + (type ? ` ${type} show` : '');
-    el.textContent = msg;
-  }
-
-  function escHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-})();
+          <button type="submit" class="btn btn-primary" style="font-size:0.85rem;padding:

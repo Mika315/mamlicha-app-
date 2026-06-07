@@ -265,6 +265,86 @@
 <!-- Lightbox -->
 <div id="lb"><img id="lb-img" /></div>
 
+<!-- Edit Modal -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto">
+  <div style="background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.75rem 1.5rem;width:100%;max-width:480px;margin:auto;direction:rtl">
+    <h2 style="color:var(--pink);font-size:1.2rem;margin-bottom:1.25rem">✏️ עריכת המלצה</h2>
+    <div id="edit-alert" style="display:none;padding:0.6rem 1rem;border-radius:8px;font-size:0.9rem;margin-bottom:1rem"></div>
+    <form id="edit-form">
+      <input type="hidden" id="edit-id" />
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">היקף (ס"מ)</label>
+          <select id="edit-circumference" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none">
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">קאפ</label>
+          <select id="edit-cup" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none">
+            <option value="D">D</option><option value="DD">DD</option><option value="E">E</option>
+            <option value="F">F</option><option value="G">G</option><option value="H">H</option>
+            <option value="I">I</option><option value="J">J</option><option value="K">K</option>
+            <option value="L">L</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:0.75rem">
+        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">קטגוריה</label>
+        <select id="edit-category" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none">
+          <option value="חולצות וגופיות">חולצות וגופיות</option>
+          <option value="גוזיות וחולצות ספורט">גוזיות וחולצות ספורט</option>
+          <option value="חזיות">חזיות</option>
+          <option value="שמלות ערב">שמלות ערב</option>
+          <option value="שמלות כלה">שמלות כלה</option>
+          <option value="בגד ים">בגד ים</option>
+          <option value="אחר">אחר</option>
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">שם חנות</label>
+          <input type="text" id="edit-store" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none" placeholder="ASOS, זארה..." />
+        </div>
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">קישור</label>
+          <input type="text" id="edit-link" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none;direction:ltr;text-align:left" placeholder="https://..." />
+        </div>
+      </div>
+
+      <div style="margin-bottom:0.75rem">
+        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">תיאור</label>
+        <textarea id="edit-description" rows="3" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none;resize:vertical;min-height:70px"></textarea>
+      </div>
+
+      <div style="margin-bottom:0.75rem">
+        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;color:#555">מאפיינים מיוחדים</label>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.88rem;cursor:pointer">
+            <input type="checkbox" name="edit-features" value="פתוח/חשוף" style="accent-color:var(--pink);width:16px;height:16px" /> פתוח/חשוף
+          </label>
+          <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.88rem;cursor:pointer">
+            <input type="checkbox" name="edit-features" value="מחזיק במיוחד" style="accent-color:var(--pink);width:16px;height:16px" /> מחזיק במיוחד
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1.25rem">
+        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;cursor:pointer;font-weight:600">
+          <input type="checkbox" id="edit-anonymous" style="accent-color:var(--pink);width:16px;height:16px" /> העלאה בעילום שם (אנונימי)
+        </label>
+      </div>
+
+      <div style="display:flex;gap:0.6rem;justify-content:flex-end">
+        <button type="button" id="edit-cancel" style="padding:0.6rem 1.2rem;background:#fff;border:1.5px solid #ccc;border-radius:8px;font-family:inherit;font-size:0.9rem;cursor:pointer;color:#666">ביטול</button>
+        <button type="submit" class="btn-pink" style="padding:0.6rem 1.4rem;font-size:0.9rem">💾 שמור שינויים</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 (function () {
   const SESSION_KEY = 'admin_pwd';
@@ -341,158 +421,4 @@
 
   // ── RECOMMENDATIONS ──
   async function loadRecs() {
-    document.getElementById('recs-container').innerHTML = '<div class="loading">טוענת...</div>';
-    try {
-      const res  = await fetch('/api/admin/data/recommendations', { headers: adminHeaders() });
-      const data = await res.json();
-      allRecs = data.data || [];
-      document.getElementById('stat-recs').textContent = `סה"כ ${allRecs.length} המלצות`;
-      renderRecs(allRecs);
-    } catch {
-      document.getElementById('recs-container').innerHTML = '<div class="empty">שגיאה בטעינת נתונים</div>';
-    }
-  }
-
-  document.getElementById('search-recs').addEventListener('input', function () {
-    const q = this.value.toLowerCase();
-    renderRecs(allRecs.filter(r =>
-      (r.category||'').toLowerCase().includes(q) ||
-      (r.store||'').toLowerCase().includes(q) ||
-      (r.description||'').toLowerCase().includes(q) ||
-      (r.link||'').toLowerCase().includes(q)
-    ));
-  });
-
-  function renderRecs(recs) {
-    const c = document.getElementById('recs-container');
-    if (!recs.length) { c.innerHTML = '<div class="empty">אין המלצות להצגה</div>'; return; }
-
-    let html = `<div style="overflow-x:auto">
-    <table class="data-table">
-      <thead><tr>
-        <th>תאריך</th><th>קטגוריה</th><th>היקף</th><th>קאפ</th>
-        <th>חנות</th><th>קישור</th><th>תיאור</th><th>תמונה</th><th>אנונימי</th><th>מחיקה</th>
-      </tr></thead><tbody>`;
-
-    recs.forEach(r => {
-      const date = new Date(r.createdAt).toLocaleDateString('he-IL');
-      const imgCell = r.imageUrl
-        ? `<img class="img-thumb" src="${esc(r.imageUrl)}" data-src="${esc(r.imageUrl)}" />`
-        : '—';
-      const link = r.link
-        ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" style="color:#c0607f">🔗 קישור</a>`
-        : '—';
-      html += `<tr>
-        <td>${date}</td>
-        <td>${esc(r.category)}</td>
-        <td>${r.circumference}</td>
-        <td>${esc(r.cup)}</td>
-        <td>${esc(r.store||'—')}</td>
-        <td>${link}</td>
-        <td style="max-width:180px">${esc(r.description||'—')}</td>
-        <td>${imgCell}</td>
-        <td>${r.isAnonymous ? 'כן' : 'לא'}</td>
-        <td><button class="btn-del" data-type="recommendation" data-id="${r._id}">🗑️ מחק</button></td>
-      </tr>`;
-    });
-
-    html += '</tbody></table></div>';
-    c.innerHTML = html;
-    bindImageClicks(c);
-    bindDeleteButtons(c, loadRecs);
-  }
-
-  // ── FORUM ──
-  async function loadForum() {
-    document.getElementById('forum-container').innerHTML = '<div class="loading">טוענת...</div>';
-    try {
-      const res  = await fetch('/api/admin/data/forum', { headers: adminHeaders() });
-      const data = await res.json();
-      allPosts = data.data || [];
-      document.getElementById('stat-forum').textContent = `סה"כ ${allPosts.length} פוסטים`;
-      renderForum(allPosts);
-    } catch {
-      document.getElementById('forum-container').innerHTML = '<div class="empty">שגיאה בטעינת נתונים</div>';
-    }
-  }
-
-  document.getElementById('search-forum').addEventListener('input', function () {
-    const q = this.value.toLowerCase();
-    renderForum(allPosts.filter(p =>
-      (p.title||'').toLowerCase().includes(q) ||
-      (p.body||'').toLowerCase().includes(q) ||
-      (p.displayName||'').toLowerCase().includes(q)
-    ));
-  });
-
-  function renderForum(posts) {
-    const c = document.getElementById('forum-container');
-    if (!posts.length) { c.innerHTML = '<div class="empty">אין פוסטים להצגה</div>'; return; }
-
-    let html = `<div style="overflow-x:auto">
-    <table class="data-table">
-      <thead><tr>
-        <th>תאריך</th><th>כותרת</th><th>תוכן</th><th>מחבר</th>
-        <th>תגובות</th><th>תמונה</th><th>מחיקה</th>
-      </tr></thead><tbody>`;
-
-    posts.forEach(p => {
-      const date = new Date(p.createdAt).toLocaleDateString('he-IL');
-      const imgCell = p.imageUrl
-        ? `<img class="img-thumb" src="${esc(p.imageUrl)}" data-src="${esc(p.imageUrl)}" />`
-        : '—';
-      html += `<tr>
-        <td>${date}</td>
-        <td style="font-weight:600">${esc(p.title)}</td>
-        <td style="max-width:220px">${esc(p.body)}</td>
-        <td>${esc(p.displayName||'אנונימית')}</td>
-        <td>${(p.replies||[]).length}</td>
-        <td>${imgCell}</td>
-        <td><button class="btn-del" data-type="forum" data-id="${p._id}">🗑️ מחק</button></td>
-      </tr>`;
-    });
-
-    html += '</tbody></table></div>';
-    c.innerHTML = html;
-    bindImageClicks(c);
-    bindDeleteButtons(c, loadForum);
-  }
-
-  // ── SHARED HELPERS ──
-  function bindImageClicks(container) {
-    container.querySelectorAll('.img-thumb').forEach(img => {
-      img.addEventListener('click', () => openLb(img.dataset.src));
-    });
-  }
-
-  function bindDeleteButtons(container, reloadFn) {
-    container.querySelectorAll('.btn-del').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('למחוק פריט זה?')) return;
-        const { type, id } = btn.dataset;
-        try {
-          const res = await fetch(`/api/admin/data/${type}/${id}`, {
-            method: 'DELETE',
-            headers: adminHeaders()
-          });
-          const data = await res.json();
-          if (data.success) {
-            btn.closest('tr').style.opacity = '0.3';
-            setTimeout(reloadFn, 400);
-          } else {
-            alert('שגיאה במחיקה: ' + data.message);
-          }
-        } catch {
-          alert('שגיאת שרת במחיקה');
-        }
-      });
-    });
-  }
-
-  function esc(str) {
-    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-})();
-</script>
-</body>
-</html>
+    document.getElementById('recs-container').innerHTML = '<div class="loading

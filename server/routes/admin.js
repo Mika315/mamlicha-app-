@@ -44,6 +44,20 @@ router.get('/data/forum', requireAdmin, async (req, res) => {
   }
 });
 
+router.put('/data/recommendation/:id', requireAdmin, async (req, res) => {
+  try {
+    const allowed = ['circumference', 'cup', 'category', 'store', 'link', 'features', 'description', 'isAnonymous'];
+    const update = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
+    const rec = await Recommendation.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true })
+      .select('-email -embedding');
+    if (!rec) return res.status(404).json({ success: false, message: 'לא נמצא' });
+    res.json({ success: true, data: rec });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 router.delete('/data/recommendation/:id', requireAdmin, async (req, res) => {
   try {
     await Recommendation.findByIdAndDelete(req.params.id);
@@ -103,18 +117,4 @@ router.get('/delete/forum/:id', async (req, res) => {
 // ─── Test email ───────────────────────────────────────────────────────────────
 router.get('/test-email', async (req, res) => {
   try {
-    const { sendRecommendationEmail } = require('../services/email');
-    await sendRecommendationEmail({
-      _id: 'TEST123', circumference: 90, cup: 'F', category: 'חזיות',
-      store: 'בדיקה', link: 'https://example.com', features: ['מחזיק במיוחד'],
-      description: 'המלצת בדיקה', imageUrl: '', isAnonymous: false,
-      createdAt: new Date(), deleteToken: 'test-token-123'
-    });
-    res.send('<h2>✅ מייל בדיקה נשלח בהצלחה!</h2>');
-  } catch (err) {
-    const detail = err.response ? JSON.stringify(err.response.body, null, 2) : err.stack;
-    res.status(500).send('<h2>❌ שגיאה:</h2><pre>' + err.message + '\n\n' + detail + '</pre>');
-  }
-});
-
-module.exports = router;
+    const { sendRecommendationEmail } = require('.
