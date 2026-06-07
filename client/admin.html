@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>פאנל ניהול | ממליצה לך בגדול</title>
+  <style>
+    :root {
+      --pink: #c0607f;
+      --pink-light: #fff0f6;
+      --pink-mid: #f7ccd8;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--pink-light);
+      min-height: 100vh;
+      color: #333;
+      direction: rtl;
+    }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .login-box {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .login-box h1 { color: var(--pink); font-size: 1.6rem; margin-bottom: 0.4rem; }
+    .login-box p  { color: #888; font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .login-box input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid #e0c0cc;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      outline: none;
+      text-align: center;
+      letter-spacing: 0.1em;
+      font-family: inherit;
+    }
+    .login-box input:focus { border-color: var(--pink); }
+    .btn-pink {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--pink);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .btn-pink:hover { background: #a84f6e; }
+    #login-error { color: #c0607f; font-size: 0.88rem; margin-top: 0.75rem; min-height: 1.2em; }
+
+    /* ── MAIN PANEL ── */
+    #admin-screen { display: none; }
+    .admin-header {
+      background: var(--pink);
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .admin-header h1 { font-size: 1.2rem; }
+    .btn-logout {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 6px;
+      padding: 0.4rem 0.9rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      background: #fff;
+      border-bottom: 2px solid var(--pink-mid);
+      padding: 0 1.5rem;
+    }
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background: none;
+      font-size: 0.95rem;
+      font-family: inherit;
+      cursor: pointer;
+      color: #888;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-weight: 600;
+    }
+    .tab-btn.active { color: var(--pink); border-bottom-color: var(--pink); }
+
+    .tab-content { display: none; padding: 1.5rem; }
+    .tab-content.active { display: block; }
+
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: #fff;
+      border: 1.5px solid var(--pink-mid);
+      border-radius: 20px;
+      padding: 0.35rem 1rem;
+      font-size: 0.85rem;
+      color: var(--pink);
+      font-weight: 600;
+    }
+
+    .search-bar {
+      margin-bottom: 1rem;
+    }
+    .search-bar input {
+      width: 100%;
+      max-width: 360px;
+      padding: 0.55rem 0.9rem;
+      border: 1.5px solid #e0c0cc;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .search-bar input:focus { border-color: var(--pink); }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      font-size: 0.88rem;
+    }
+    .data-table th {
+      background: var(--pink);
+      color: #fff;
+      padding: 0.7rem 0.8rem;
+      text-align: right;
+      font-weight: 600;
+    }
+    .data-table td {
+      padding: 0.65rem 0.8rem;
+      border-bottom: 1px solid #f3e0e8;
+      vertical-align: top;
+      max-width: 200px;
+      word-break: break-word;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #fff8fb; }
+
+    .btn-del {
+      background: #fff;
+      color: #c0607f;
+      border: 1.5px solid #c0607f;
+      border-radius: 6px;
+      padding: 0.3rem 0.7rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-del:hover { background: #c0607f; color: #fff; }
+
+    .loading { text-align:center; padding: 2rem; color: #aaa; }
+    .empty   { text-align:center; padding: 2rem; color: #bbb; font-size: 0.95rem; }
+
+    .img-thumb {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: zoom-in;
+    }
+
+    /* Lightbox */
+    #lb {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    #lb img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>🔐 פאנל ניהול</h1>
+    <p>ממליצה לך בגדול</p>
+    <input type="password" id="pwd-input" placeholder="סיסמת מנהל" autocomplete="current-password" />
+    <button class="btn-pink" id="btn-login">כניסה</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- MAIN PANEL -->
+<div id="admin-screen">
+  <div class="admin-header">
+    <h1>💕 פאנל ניהול — ממליצה לך בגדול</h1>
+    <button class="btn-logout" id="btn-logout">יציאה</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="recs">📋 המלצות</button>
+    <button class="tab-btn" data-tab="forum">💬 פורום</button>
+  </div>
+
+  <!-- RECOMMENDATIONS TAB -->
+  <div class="tab-content active" id="tab-recs">
+    <div class="stats-bar">
+      <div class="stat-pill" id="stat-recs">טוען...</div>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="search-recs" placeholder="🔍 חיפוש לפי קטגוריה, חנות, תיאור..." />
+    </div>
+    <div id="recs-container"><div class="loading">טוענת נתונים...</div></div>
+  </div>
+
+  <!-- FORUM TAB -->
+  <div class="tab-content" id="tab-forum">
+    <div class="stats-bar">
+      <div class="stat-pill" id="stat-forum">טוען...</div>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="search-forum" placeholder="🔍 חיפוש לפי כותרת או תוכן..." />
+    </div>
+    <div id="forum-container"><div class="loading">טוענת נתונים...</div></div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lb"><img id="lb-img" /></div>
+
+<script>
+(function () {
+  const SESSION_KEY = 'admin_pwd';
+  let adminPwd = '';
+  let allRecs = [];
+  let allPosts = [];
+
+  // ── LIGHTBOX ──
+  const lb = document.getElementById('lb');
+  const lbImg = document.getElementById('lb-img');
+  lb.addEventListener('click', () => lb.style.display = 'none');
+  function openLb(src) { lbImg.src = src; lb.style.display = 'flex'; }
+
+  // ── LOGIN ──
+  const pwdInput  = document.getElementById('pwd-input');
+  const loginErr  = document.getElementById('login-error');
+  const btnLogin  = document.getElementById('btn-login');
+
+  // Auto-login if stored in session
+  const stored = sessionStorage.getItem(SESSION_KEY);
+  if (stored) tryLogin(stored);
+
+  btnLogin.addEventListener('click', () => tryLogin(pwdInput.value.trim()));
+  pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(pwdInput.value.trim()); });
+
+  async function tryLogin(pwd) {
+    if (!pwd) { loginErr.textContent = 'יש להזין סיסמה'; return; }
+    try {
+      const res  = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd })
+      });
+      const data = await res.json();
+      if (data.success) {
+        adminPwd = pwd;
+        sessionStorage.setItem(SESSION_KEY, pwd);
+        showAdminPanel();
+      } else {
+        loginErr.textContent = 'סיסמה שגויה ❌';
+      }
+    } catch {
+      loginErr.textContent = 'שגיאת שרת, נסי שוב';
+    }
+  }
+
+  function showAdminPanel() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display  = 'block';
+    loadRecs();
+    loadForum();
+  }
+
+  // ── LOGOUT ──
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  });
+
+  // ── TABS ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── HEADERS ──
+  function adminHeaders() {
+    return { 'Content-Type': 'application/json', 'x-admin-password': adminPwd };
+  }
+
+  // ── RECOMMENDATIONS ──
+  async function loadRecs() {
+    document.getElementById('recs-container').innerHTML = '<div class="loading">טוענת...</div>';
+    try {
+      const res  = await fetch('/api/admin/data/recommendations', { headers: adminHeaders() });
+      const data = await res.json();
+      allRecs = data.data || [];
+      document.getElementById('stat-recs').textContent = `סה"כ ${allRecs.length} המלצות`;
+      renderRecs(allRecs);
+    } catch {
+      document.getElementById('recs-container').innerHTML = '<div class="empty">שגיאה בטעינת נתונים</div>';
+    }
+  }
+
+  document.getElementById('search-recs').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    renderRecs(allRecs.filter(r =>
+      (r.category||'').toLowerCase().includes(q) ||
+      (r.store||'').toLowerCase().includes(q) ||
+      (r.description||'').toLowerCase().includes(q) ||
+      (r.link||'').toLowerCase().includes(q)
+    ));
+  });
+
+  function renderRecs(recs) {
+    const c = document.getElementById('recs-container');
+    if (!recs.length) { c.innerHTML = '<div class="empty">אין המלצות להצגה</div>'; return; }
+
+    let html = `<div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr>
+        <th>תאריך</th><th>קטגוריה</th><th>היקף</th><th>קאפ</th>
+        <th>חנות</th><th>קישור</th><th>תיאור</th><th>תמונה</th><th>אנונימי</th><th>מחיקה</th>
+      </tr></thead><tbody>`;
+
+    recs.forEach(r => {
+      const date = new Date(r.createdAt).toLocaleDateString('he-IL');
+      const imgCell = r.imageUrl
+        ? `<img class="img-thumb" src="${esc(r.imageUrl)}" data-src="${esc(r.imageUrl)}" />`
+        : '—';
+      const link = r.link
+        ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" style="color:#c0607f">🔗 קישור</a>`
+        : '—';
+      html += `<tr>
+        <td>${date}</td>
+        <td>${esc(r.category)}</td>
+        <td>${r.circumference}</td>
+        <td>${esc(r.cup)}</td>
+        <td>${esc(r.store||'—')}</td>
+        <td>${link}</td>
+        <td style="max-width:180px">${esc(r.description||'—')}</td>
+        <td>${imgCell}</td>
+        <td>${r.isAnonymous ? 'כן' : 'לא'}</td>
+        <td><button class="btn-del" data-type="recommendation" data-id="${r._id}">🗑️ מחק</button></td>
+      </tr>`;
+    });
+
+    html += '</tbody></table></div>';
+    c.innerHTML = html;
+    bindImageClicks(c);
+    bindDeleteButtons(c, loadRecs);
+  }
+
+  // ── FORUM ──
+  async function loadForum() {
+    document.getElementById('forum-container').innerHTML = '<div class="loading">טוענת...</div>';
+    try {
+      const res  = await fetch('/api/admin/data/forum', { headers: adminHeaders() });
+      const data = await res.json();
+      allPosts = data.data || [];
+      document.getElementById('stat-forum').textContent = `סה"כ ${allPosts.length} פוסטים`;
+      renderForum(allPosts);
+    } catch {
+      document.getElementById('forum-container').innerHTML = '<div class="empty">שגיאה בטעינת נתונים</div>';
+    }
+  }
+
+  document.getElementById('search-forum').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    renderForum(allPosts.filter(p =>
+      (p.title||'').toLowerCase().includes(q) ||
+      (p.body||'').toLowerCase().includes(q) ||
+      (p.displayName||'').toLowerCase().includes(q)
+    ));
+  });
+
+  function renderForum(posts) {
+    const c = document.getElementById('forum-container');
+    if (!posts.length) { c.innerHTML = '<div class="empty">אין פוסטים להצגה</div>'; return; }
+
+    let html = `<div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr>
+        <th>תאריך</th><th>כותרת</th><th>תוכן</th><th>מחבר</th>
+        <th>תגובות</th><th>תמונה</th><th>מחיקה</th>
+      </tr></thead><tbody>`;
+
+    posts.forEach(p => {
+      const date = new Date(p.createdAt).toLocaleDateString('he-IL');
+      const imgCell = p.imageUrl
+        ? `<img class="img-thumb" src="${esc(p.imageUrl)}" data-src="${esc(p.imageUrl)}" />`
+        : '—';
+      html += `<tr>
+        <td>${date}</td>
+        <td style="font-weight:600">${esc(p.title)}</td>
+        <td style="max-width:220px">${esc(p.body)}</td>
+        <td>${esc(p.displayName||'אנונימית')}</td>
+        <td>${(p.replies||[]).length}</td>
+        <td>${imgCell}</td>
+        <td><button class="btn-del" data-type="forum" data-id="${p._id}">🗑️ מחק</button></td>
+      </tr>`;
+    });
+
+    html += '</tbody></table></div>';
+    c.innerHTML = html;
+    bindImageClicks(c);
+    bindDeleteButtons(c, loadForum);
+  }
+
+  // ── SHARED HELPERS ──
+  function bindImageClicks(container) {
+    container.querySelectorAll('.img-thumb').forEach(img => {
+      img.addEventListener('click', () => openLb(img.dataset.src));
+    });
+  }
+
+  function bindDeleteButtons(container, reloadFn) {
+    container.querySelectorAll('.btn-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('למחוק פריט זה?')) return;
+        const { type, id } = btn.dataset;
+        try {
+          const res = await fetch(`/api/admin/data/${type}/${id}`, {
+            method: 'DELETE',
+            headers: adminHeaders()
+          });
+          const data = await res.json();
+          if (data.success) {
+            btn.closest('tr').style.opacity = '0.3';
+            setTimeout(reloadFn, 400);
+          } else {
+            alert('שגיאה במחיקה: ' + data.message);
+          }
+        } catch {
+          alert('שגיאת שרת במחיקה');
+        }
+      });
+    });
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+</script>
+</body>
+</html>

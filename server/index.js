@@ -29,6 +29,7 @@ app.use('/api/admin', require('./routes/admin'));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../client/index.html')));
 app.get('/recommend', (req, res) => res.sendFile(path.join(__dirname, '../client/recommend.html')));
 app.get('/forum', (req, res) => res.sendFile(path.join(__dirname, '../client/forum.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../client/admin.html')));
 
 // Connect to MongoDB and start server
 mongoose.connect(process.env.MONGODB_URI)

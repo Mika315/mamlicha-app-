@@ -49,7 +49,10 @@ ${deleteLink}
     to: ADMIN_EMAIL,
     from: FROM_EMAIL,
     subject: '📬 המלצה חדשה התקבלה – ממליצה לך בגדול',
-    text: body
+    text: body,
+    trackingSettings: {
+      clickTracking: { enable: false, enableText: false }
+    }
   });
 
   console.log('✅ Recommendation email sent via SendGrid to', ADMIN_EMAIL);
@@ -84,7 +87,10 @@ ${deleteLink}
     to: ADMIN_EMAIL,
     from: FROM_EMAIL,
     subject: '💬 פוסט חדש בפורום – ממליצה לך בגדול',
-    text: body
+    text: body,
+    trackingSettings: {
+      clickTracking: { enable: false, enableText: false }
+    }
   });
 
   console.log('✅ Forum email sent via SendGrid to', ADMIN_EMAIL);

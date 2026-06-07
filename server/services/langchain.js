@@ -1,15 +1,36 @@
 const { MongoDBAtlasVectorSearch } = require('@langchain/mongodb');
-const { GoogleGenerativeAIEmbeddings } = require('@langchain/google-genai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const mongoose = require('mongoose');
+
+/**
+ * Custom embeddings class that wraps @google/generative-ai directly.
+ * This avoids the @langchain/google-genai API version mismatch (v1beta 404 errors).
+ * LangChain's MongoDBAtlasVectorSearch only needs embedDocuments + embedQuery.
+ */
+class GeminiEmbeddings {
+  constructor() {
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    this.modelName = 'text-embedding-004';
+  }
+
+  async embedQuery(text) {
+    const model = this.genAI.getGenerativeModel({ model: this.modelName });
+    const result = await model.embedContent(text);
+    return result.embedding.values;
+  }
+
+  async embedDocuments(texts) {
+    return Promise.all(texts.map(t => this.embedQuery(t)));
+  }
+}
 
 /**
  * Perform RAG vector search on the recommendations collection.
  * Returns a formatted string of top matching recommendations.
- * Falls back to empty string if DB is empty or search fails.
+ * Falls back gracefully if DB is empty or vector search fails.
  */
 async function retrieveRecommendations(query, k = 5) {
   try {
-    // Check if collection has any documents first
     const collection = mongoose.connection.db.collection('recommendations');
     const count = await collection.countDocuments();
 
@@ -18,10 +39,7 @@ async function retrieveRecommendations(query, k = 5) {
       return '';
     }
 
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-      apiKey: process.env.GEMINI_API_KEY,
-      model: 'embedding-001'
-    });
+    const embeddings = new GeminiEmbeddings();
 
     const vectorStore = new MongoDBAtlasVectorSearch(embeddings, {
       collection,
@@ -48,7 +66,7 @@ async function retrieveRecommendations(query, k = 5) {
     }).join('\n\n');
   } catch (err) {
     console.error('[RAG] retrieval error:', err.message);
-    return ''; // Always fall back gracefully
+    return '';
   }
 }
 
