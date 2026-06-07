@@ -10,7 +10,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * Generate a text embedding vector for RAG.
  */
 async function generateEmbedding(text) {
-  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+  const model = genAI.getGenerativeModel({ model: 'embedding-001' });
   const result = await model.embedContent(text);
   return result.embedding.values;
 }

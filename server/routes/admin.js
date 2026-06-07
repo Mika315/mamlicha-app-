@@ -82,7 +82,8 @@ router.get('/test-email', async (req, res) => {
     await sendRecommendationEmail(fakeRec);
     res.send('<h2>✅ מייל בדיקה נשלח בהצלחה! בדקי את תיבת הדואר של contact.mamlicha@gmail.com</h2>');
   } catch (err) {
-    res.status(500).send('<h2>❌ שגיאה בשליחת מייל:</h2><pre>' + err.message + '\n\n' + err.stack + '</pre>');
+    const detail = err.response ? JSON.stringify(err.response.body, null, 2) : err.stack;
+    res.status(500).send('<h2>❌ שגיאה בשליחת מייל:</h2><pre>' + err.message + '\n\n' + detail + '</pre>');
   }
 });
 

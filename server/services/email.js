@@ -1,29 +1,15 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
 const ADMIN_EMAIL = 'contact.mamlicha@gmail.com';
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'contact.mamlicha@gmail.com';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-// Use explicit SMTP settings instead of service:'gmail'
-// This is more reliable on cloud hosts like Render that may block generic service configs
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // STARTTLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS   // Gmail App Password (16 chars, no spaces)
-  }
-});
-
-// Verify connection on startup so any config errors appear in logs immediately
-transporter.verify((err, success) => {
-  if (err) {
-    console.error('❌ Email transporter verification failed:', err.message);
-    console.error('   Make sure EMAIL_USER and EMAIL_PASS are set correctly in .env');
-  } else {
-    console.log('✅ Email transporter ready — will send to', ADMIN_EMAIL);
-  }
-});
+if (!process.env.SENDGRID_API_KEY) {
+  console.error('⚠️  SENDGRID_API_KEY is not set in environment variables!');
+} else {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log('✅ SendGrid email service ready — will send to', ADMIN_EMAIL);
+}
 
 /**
  * Send admin email for a new recommendation
@@ -59,14 +45,14 @@ async function sendRecommendationEmail(rec) {
 ${deleteLink}
   `;
 
-  const info = await transporter.sendMail({
-    from: `"ממליצה לך בגדול" <${process.env.EMAIL_USER}>`,
+  await sgMail.send({
     to: ADMIN_EMAIL,
+    from: FROM_EMAIL,
     subject: '📬 המלצה חדשה התקבלה – ממליצה לך בגדול',
     text: body
   });
 
-  console.log('✅ Recommendation email sent, messageId:', info.messageId);
+  console.log('✅ Recommendation email sent via SendGrid to', ADMIN_EMAIL);
 }
 
 /**
@@ -94,14 +80,14 @@ ${post.body}
 ${deleteLink}
   `;
 
-  const info = await transporter.sendMail({
-    from: `"ממליצה לך בגדול" <${process.env.EMAIL_USER}>`,
+  await sgMail.send({
     to: ADMIN_EMAIL,
+    from: FROM_EMAIL,
     subject: '💬 פוסט חדש בפורום – ממליצה לך בגדול',
     text: body
   });
 
-  console.log('✅ Forum email sent, messageId:', info.messageId);
+  console.log('✅ Forum email sent via SendGrid to', ADMIN_EMAIL);
 }
 
 module.exports = { sendRecommendationEmail, sendForumPostEmail };
