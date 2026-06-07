@@ -3,7 +3,6 @@ const router = express.Router();
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const Recommendation = require('../models/Recommendation');
-const { generateEmbedding } = require('../services/gemini');
 const { sendRecommendationEmail } = require('../services/email');
 
 // GET /api/recommendations — fetch with optional filters
@@ -64,15 +63,6 @@ router.post('/', async (req, res) => {
       hashedEmail = await bcrypt.hash(email, 10);
     }
 
-    // Build text for embedding
-    const textForEmbedding = `${category} היקף:${circumference} קאפ:${cup} ${description || ''} ${store || ''}`;
-    let embedding = [];
-    try {
-      embedding = await generateEmbedding(textForEmbedding);
-    } catch (e) {
-      console.warn('Embedding generation failed:', e.message);
-    }
-
     // Generate secure delete token
     const deleteToken = crypto.randomBytes(32).toString('hex');
 
@@ -87,7 +77,7 @@ router.post('/', async (req, res) => {
       imageUrl: imageUrl || '',
       isAnonymous: Boolean(isAnonymous),
       email: hashedEmail,
-      embedding,
+      embedding: [],
       deleteToken
     });
 
