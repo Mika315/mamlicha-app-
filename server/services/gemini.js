@@ -1,60 +1,46 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 if (!process.env.GEMINI_API_KEY) {
-  console.error('⚠️  GEMINI_API_KEY is not set in .env!');
+  console.error('⚠️  GEMINI_API_KEY is not set in environment variables!');
 }
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
- * Generate a text embedding vector for a given text string.
+ * Generate a text embedding vector for RAG.
  */
 async function generateEmbedding(text) {
-  try {
-    const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
-    const result = await model.embedContent(text);
-    return result.embedding.values;
-  } catch (err) {
-    console.error('Gemini embedding error:', err);
-    throw err;
-  }
+  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+  const result = await model.embedContent(text);
+  return result.embedding.values;
 }
 
 /**
- * Generate a chat response from Gemini using the full conversation history.
+ * Generate a chat response using generateContent (simpler than startChat, no history issues).
+ * All context is embedded directly in the prompt.
  */
 async function generateChatResponse(history, userMessage, contextText = '') {
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    const systemInstruction = `את "רוני", סטייליסטית אישית ועוזרת חכמה באתר הקהילה "ממליצה לך בגדול" – אתר המיועד לנשים ונערות בעלות חזה גדול (מידות D עד L).
-עניי רק בהמלצות לבגדים שמתאימות לחזה גדול.
+  const systemPrompt = `את "רוני", סטייליסטית אישית ועוזרת חכמה באתר הקהילה "ממליצה לך בגדול".
+האתר מיועד לנשים ונערות בעלות חזה גדול (מידות D עד L).
 ענו בעברית בלבד. היי חמה, אישית ומעודדת.
-אם יש לך המלצות רלוונטיות ממסד הנתונים, ציין אותן בצורה ברורה עם קישורים.
-${contextText
-  ? `הקשר ממסד הנתונים:\n${contextText}`
-  : 'עדיין אין המלצות במאגר שלנו לקטגוריה זו, אבל את יכולה לעזור עם עצות כלליות!'}`;
+אם יש המלצות רלוונטיות ממסד הנתונים — ציין אותן בצורה ברורה עם קישורים.
+אם אין — ספקי עצות כלליות מועילות בהתאם למידה ולקטגוריה.`;
 
-    const chat = model.startChat({
-      history: [
-        {
-          role: 'user',
-          parts: [{ text: systemInstruction }]
-        },
-        {
-          role: 'model',
-          parts: [{ text: 'הבנתי! אני רוני, הסטייליסטית שלך. אשמח לעזור!' }]
-        },
-        ...history
-      ]
-    });
+  const dbContext = contextText
+    ? `\n\nהמלצות רלוונטיות ממסד הנתונים של האתר:\n${contextText}`
+    : '\n\n(אין עדיין המלצות ספציפיות במסד הנתונים לבקשה זו — ענו עם עצות כלליות.)';
 
-    const result = await chat.sendMessage(userMessage);
-    return result.response.text();
-  } catch (err) {
-    console.error('Gemini chat error:', err);
-    throw err;
-  }
+  const fullPrompt = `${systemPrompt}${dbContext}\n\nשאלת המשתמשת:\n${userMessage}`;
+
+  console.log('[Gemini] Calling generateContent, prompt length:', fullPrompt.length);
+
+  const result = await model.generateContent(fullPrompt);
+  const text = result.response.text();
+
+  console.log('[Gemini] Response received, length:', text.length);
+  return text;
 }
 
 module.exports = { generateEmbedding, generateChatResponse };

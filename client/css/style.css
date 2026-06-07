@@ -737,3 +737,24 @@ footer a { color: var(--color-accent); text-decoration: none; }
 @media (max-width: 360px) {
   .navbar-brand { font-size: 1.1rem; }
 }
+
+.rec-card-img-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-top: 0.3rem;
+  font-family: inherit;
+  transition: background 0.2s, color 0.2s;
+}
+.rec-card-img-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+}

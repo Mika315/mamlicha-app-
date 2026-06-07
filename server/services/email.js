@@ -7,8 +7,8 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 // This is more reliable on cloud hosts like Render that may block generic service configs
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // SSL
+  port: 587,
+  secure: false, // STARTTLS
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS   // Gmail App Password (16 chars, no spaces)

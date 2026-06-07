@@ -59,4 +59,31 @@ router.get('/delete/forum/:id', async (req, res) => {
   }
 });
 
+
+// GET /api/admin/test-email — send a test email to verify configuration
+router.get('/test-email', async (req, res) => {
+  try {
+    const { sendRecommendationEmail } = require('../services/email');
+    // Build a fake rec object for testing
+    const fakeRec = {
+      _id: 'TEST123',
+      circumference: 90,
+      cup: 'F',
+      category: 'חזיות',
+      store: 'בדיקה',
+      link: 'https://example.com',
+      features: ['מחזיק במיוחד'],
+      description: 'זוהי המלצת בדיקה',
+      imageUrl: '',
+      isAnonymous: false,
+      createdAt: new Date(),
+      deleteToken: 'test-token-123'
+    };
+    await sendRecommendationEmail(fakeRec);
+    res.send('<h2>✅ מייל בדיקה נשלח בהצלחה! בדקי את תיבת הדואר של contact.mamlicha@gmail.com</h2>');
+  } catch (err) {
+    res.status(500).send('<h2>❌ שגיאה בשליחת מייל:</h2><pre>' + err.message + '\n\n' + err.stack + '</pre>');
+  }
+});
+
 module.exports = router;

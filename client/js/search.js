@@ -119,33 +119,25 @@
     const date = new Date(rec.createdAt).toLocaleDateString('he-IL');
     const user = rec.isAnonymous ? 'משתמשת אנונימית' : 'חברת הקהילה';
 
-    // Build image HTML — clickable thumbnail that opens lightbox
-    const imgHtml = rec.imageUrl
-      ? `<img
-          class="rec-card-img"
-          src="${escHtml(rec.imageUrl)}"
-          alt="תמונת פריט"
-          loading="lazy"
-          title="לחצי להגדלה"
-          style="cursor:zoom-in"
-          data-src="${escHtml(rec.imageUrl)}"
-        />`
+    // Image shown only via lightbox button — no thumbnail
+    const imageBtn = rec.imageUrl
+      ? `<button class="rec-card-img-btn" data-img="${escHtml(rec.imageUrl)}">📷 לצפייה בתמונה</button>`
       : '';
 
     card.innerHTML = `
       <span class="rec-card-tag">${escHtml(rec.category)}</span>
       <div class="rec-card-size">היקף ${rec.circumference} | קאפ ${escHtml(rec.cup)}</div>
-      ${imgHtml}
       ${rec.store ? `<div class="rec-card-store">🏪 ${escHtml(rec.store)}</div>` : ''}
       ${rec.description ? `<div class="rec-card-desc">${escHtml(rec.description)}</div>` : ''}
       ${rec.features && rec.features.length ? `<div style="font-size:0.82rem;color:var(--color-accent)">✨ ${rec.features.map(escHtml).join(' | ')}</div>` : ''}
+      ${imageBtn}
       ${rec.link ? `<a class="rec-card-link" href="${escHtml(rec.link)}" target="_blank" rel="noopener">🔗 לצפייה בפריט</a>` : ''}
       <div class="rec-card-footer">${user} • ${date}</div>
     `;
 
-    // Wire up lightbox click on the image
+    // Wire up lightbox click on the image button
     if (rec.imageUrl) {
-      card.querySelector('.rec-card-img').addEventListener('click', () => {
+      card.querySelector('.rec-card-img-btn').addEventListener('click', () => {
         openLightbox(rec.imageUrl);
       });
     }
