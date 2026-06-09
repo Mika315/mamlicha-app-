@@ -15,16 +15,22 @@
   }
 
   // ============ CANVAS BLUR TOOL ============
+  // Strategy for quality preservation:
+  //   displayCanvas — small, fits screen, used only for showing to user
+  //   origCanvas    — full original resolution, never modified
+  //   blurCanvas    — full original resolution, accumulates blur, exported on submit
+  // Coordinates from touch/mouse are in displayCanvas space and are scaled up
+  // to origCanvas/blurCanvas space before applying blur.
+
   var imageInput  = document.getElementById('image-input');
   var canvasWrap  = document.getElementById('canvas-wrap');
-  var canvas      = document.getElementById('imageCanvas');
+  var canvas      = document.getElementById('imageCanvas');  // display canvas
   var ctx         = canvas ? canvas.getContext('2d') : null;
 
-  // origCanvas — untouched original, never modified
-  // blurCanvas — accumulates blur strokes; exported on submit
-  var origCanvas = null;
-  var blurCanvas = null;
-  var isDrawing  = false;
+  var origCanvas  = null;
+  var blurCanvas  = null;
+  var isDrawing   = false;
+  var scaleToOrig = 1; // displayCanvas coords * scaleToOrig = origCanvas coords
 
   function makeOffscreen(w, h) {
     var c = document.createElement('canvas');
@@ -33,17 +39,19 @@
   }
 
   function getBrushSize() {
+    // Brush size is in display pixels; scale up to orig pixels for actual blur
     var el = document.getElementById('brush-size');
-    return parseInt(el ? el.value : 30) || 30;
+    var displayR = parseInt(el ? el.value : 30) || 30;
+    return displayR * scaleToOrig;
   }
 
-  // Copy blurCanvas to visible canvas, optionally draw brush cursor
+  // Copy blurCanvas (scaled down) to displayCanvas, optionally draw brush cursor
   function renderCanvas(showCursor, cx, cy) {
     if (!ctx || !blurCanvas) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(blurCanvas, 0, 0);
+    ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
     if (showCursor) {
-      var r = getBrushSize();
+      var r = parseInt(document.getElementById('brush-size') ? document.getElementById('brush-size').value : 30) || 30;
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(231,84,128,0.9)';
@@ -51,7 +59,6 @@
       ctx.setLineDash([5, 4]);
       ctx.stroke();
       ctx.setLineDash([]);
-      // Fill semi-transparent to make it more visible on touch
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(231,84,128,0.08)';
@@ -59,55 +66,55 @@
     }
   }
 
-  // Blur a circular region on blurCanvas, reading pixels from origCanvas.
-  // Using origCanvas as source prevents self-referential blur bleed.
-  function applyBlurAt(x, y) {
+  // Blur a circular region on blurCanvas (full resolution), reading from origCanvas.
+  // x, y are in ORIG canvas coordinates.
+  function applyBlurAt(origX, origY) {
     if (!origCanvas || !blurCanvas) return;
     var r      = getBrushSize();
-    var blurPx = 14;
+    var blurPx = Math.round(14 * scaleToOrig);
     var pad    = blurPx * 3;
 
-    var bx = Math.max(0, Math.floor(x - r));
-    var by = Math.max(0, Math.floor(y - r));
+    var bx = Math.max(0, Math.floor(origX - r));
+    var by = Math.max(0, Math.floor(origY - r));
     var bw = Math.min(r * 2, blurCanvas.width - bx);
     var bh = Math.min(r * 2, blurCanvas.height - by);
     if (bw <= 0 || bh <= 0) return;
 
-    // Padded source region from original image
     var sx = Math.max(0, bx - pad);
     var sy = Math.max(0, by - pad);
     var sw = Math.min(bw + pad * 2, origCanvas.width  - sx);
     var sh = Math.min(bh + pad * 2, origCanvas.height - sy);
 
-    // Blur the padded patch in a temp canvas
     var tmp  = makeOffscreen(sw, sh);
     var tCtx = tmp.getContext('2d');
     tCtx.filter = 'blur(' + blurPx + 'px)';
     tCtx.drawImage(origCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
     tCtx.filter = 'none';
 
-    // Stamp only the circular brush area onto blurCanvas
     var bCtx = blurCanvas.getContext('2d');
     bCtx.save();
     bCtx.beginPath();
-    bCtx.arc(x, y, r, 0, Math.PI * 2);
+    bCtx.arc(origX, origY, r, 0, Math.PI * 2);
     bCtx.clip();
     bCtx.drawImage(tmp, bx - sx, by - sy, bw, bh, bx, by, bw, bh);
     bCtx.restore();
   }
 
-  // Returns touch/mouse position in canvas pixel coordinates.
-  // NOTE: canvas.width == CSS width (no DPR scaling) so scaleX == 1,
-  // which means coordinates map directly regardless of devicePixelRatio.
-  function getPos(e) {
-    var rect   = canvas.getBoundingClientRect();
+  // Returns touch/mouse position in DISPLAY canvas pixel coordinates
+  function getDisplayPos(e) {
+    var rect = canvas.getBoundingClientRect();
     var scaleX = canvas.width  / rect.width;
     var scaleY = canvas.height / rect.height;
-    var src    = e.touches ? e.touches[0] : e;
+    var src = e.touches ? e.touches[0] : e;
     return {
       x: (src.clientX - rect.left) * scaleX,
       y: (src.clientY - rect.top)  * scaleY
     };
+  }
+
+  // Convert display coords to origCanvas coords
+  function toOrig(p) {
+    return { x: p.x * scaleToOrig, y: p.y * scaleToOrig };
   }
 
   if (imageInput) {
@@ -118,23 +125,29 @@
       reader.onload = function(ev) {
         var img = new Image();
         img.onload = function() {
-          var maxW  = Math.min(window.innerWidth - 60, 560);
-          var scale = Math.min(maxW / img.width, 400 / img.height, 1);
-          var w     = Math.round(img.width  * scale);
-          var h     = Math.round(img.height * scale);
+          var origW = img.naturalWidth  || img.width;
+          var origH = img.naturalHeight || img.height;
 
-          // Set canvas to logical pixel size (no DPR multiplication).
-          // This keeps coordinate systems consistent across all devices.
-          canvas.width  = w;
-          canvas.height = h;
+          // Display canvas: scaled to fit screen
+          var maxW  = Math.min(window.innerWidth - 60, 560);
+          var scale = Math.min(maxW / origW, 400 / origH, 1);
+          var dispW = Math.round(origW * scale);
+          var dispH = Math.round(origH * scale);
+
+          canvas.width  = dispW;
+          canvas.height = dispH;
           canvas.style.width  = '';
           canvas.style.height = '';
 
-          origCanvas = makeOffscreen(w, h);
-          origCanvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          // scaleToOrig: multiply display coords by this to get orig coords
+          scaleToOrig = origW / dispW;
 
-          blurCanvas = makeOffscreen(w, h);
-          blurCanvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          // Full-resolution offscreen canvases
+          origCanvas = makeOffscreen(origW, origH);
+          origCanvas.getContext('2d').drawImage(img, 0, 0, origW, origH);
+
+          blurCanvas = makeOffscreen(origW, origH);
+          blurCanvas.getContext('2d').drawImage(img, 0, 0, origW, origH);
 
           renderCanvas(false);
           canvasWrap.style.display = 'block';
@@ -148,13 +161,13 @@
   if (canvas) {
     canvas.addEventListener('mousedown', function(e) {
       isDrawing = true;
-      var p = getPos(e);
-      applyBlurAt(p.x, p.y);
+      var p = getDisplayPos(e);
+      applyBlurAt(toOrig(p).x, toOrig(p).y);
       renderCanvas(true, p.x, p.y);
     });
     canvas.addEventListener('mousemove', function(e) {
-      var p = getPos(e);
-      if (isDrawing) applyBlurAt(p.x, p.y);
+      var p = getDisplayPos(e);
+      if (isDrawing) applyBlurAt(toOrig(p).x, toOrig(p).y);
       renderCanvas(true, p.x, p.y);
     });
     canvas.addEventListener('mouseup', function() { isDrawing = false; renderCanvas(false); });
@@ -163,14 +176,14 @@
     canvas.addEventListener('touchstart', function(e) {
       e.preventDefault();
       isDrawing = true;
-      var p = getPos(e);
-      applyBlurAt(p.x, p.y);
+      var p = getDisplayPos(e);
+      applyBlurAt(toOrig(p).x, toOrig(p).y);
       renderCanvas(true, p.x, p.y);
     }, { passive: false });
     canvas.addEventListener('touchmove', function(e) {
       e.preventDefault();
-      var p = getPos(e);
-      if (isDrawing) applyBlurAt(p.x, p.y);
+      var p = getDisplayPos(e);
+      if (isDrawing) applyBlurAt(toOrig(p).x, toOrig(p).y);
       renderCanvas(true, p.x, p.y);
     }, { passive: false });
     canvas.addEventListener('touchend', function() { isDrawing = false; renderCanvas(false); });
@@ -248,9 +261,9 @@
         .finally(function() { submitBtn.disabled = false; submitBtn.textContent = 'שלחי המלצה'; });
       }
 
-      // Upload image if canvas is shown
+      // Export from blurCanvas (full original resolution)
       if (blurCanvas && canvasWrap.style.display !== 'none') {
-        var base64 = blurCanvas.toDataURL('image/jpeg', 0.85);
+        var base64 = blurCanvas.toDataURL('image/jpeg', 0.92);
         fetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
