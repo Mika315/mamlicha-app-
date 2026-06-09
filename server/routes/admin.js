@@ -58,6 +58,20 @@ router.put('/data/recommendation/:id', requireAdmin, async (req, res) => {
   }
 });
 
+router.put('/data/forum/:id', requireAdmin, async (req, res) => {
+  try {
+    const allowed = ['title', 'body', 'displayName', 'isAnonymous'];
+    const update = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
+    const post = await ForumPost.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true })
+      .select('-email -deleteToken');
+    if (!post) return res.status(404).json({ success: false, message: 'לא נמצא' });
+    res.json({ success: true, data: post });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 router.delete('/data/recommendation/:id', requireAdmin, async (req, res) => {
   try {
     await Recommendation.findByIdAndDelete(req.params.id);
@@ -76,20 +90,20 @@ router.delete('/data/forum/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// --- Email-link delete routes (token-based, from email) ---
+// --- Email-link delete routes ---
 const SUCCESS_HTML = `<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" /><title>נמחק בהצלחה</title>
   <style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#fff0f6}.box{text-align:center;padding:2rem;background:#fff;border-radius:1rem;box-shadow:0 4px 20px rgba(0,0,0,.1)}h1{color:#c0607f}</style>
 </head>
-<body><div class="box"><h1>הפוסט נמחק בהצלחה ✅</h1><p>הפריט הוסר ממסד הנתונים.</p><a href="/">חזרה לאתר</a></div></body>
+<body><div class="box"><h1>הפוסט נמחק בהצלחה</h1><p>הפריט הוסר ממסד הנתונים.</p><a href="/">חזרה לאתר</a></div></body>
 </html>`;
 
 const FORBIDDEN_HTML = `<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head><meta charset="UTF-8"/><title>שגיאה</title></head>
-<body dir="rtl"><h2>❌ טוקן לא תקין או פג תוקף.</h2></body>
+<body dir="rtl"><h2>טוקן לא תקין או פג תוקף.</h2></body>
 </html>`;
 
 router.get('/delete/recommendation/:id', async (req, res) => {
@@ -124,10 +138,10 @@ router.get('/test-email', async (req, res) => {
       description: 'המלצת בדיקה', imageUrl: '', isAnonymous: false,
       createdAt: new Date(), deleteToken: 'test-token-123'
     });
-    res.send('<h2>✅ מייל בדיקה נשלח בהצלחה!</h2>');
+    res.send('<h2>מייל בדיקה נשלח בהצלחה!</h2>');
   } catch (err) {
     const detail = err.response ? JSON.stringify(err.response.body, null, 2) : err.stack;
-    res.status(500).send('<h2>❌ שגיאה:</h2><pre>' + err.message + '\n\n' + detail + '</pre>');
+    res.status(500).send('<h2>שגיאה:</h2><pre>' + err.message + '\n\n' + detail + '</pre>');
   }
 });
 

@@ -5,188 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>פאנל ניהול | ממליצה לך בגדול</title>
   <style>
-    :root {
-      --pink: #c0607f;
-      --pink-light: #fff0f6;
-      --pink-mid: #f7ccd8;
-      --radius: 12px;
-      --shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--pink-light);
-      min-height: 100vh;
-      color: #333;
-      direction: rtl;
-    }
-    #login-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    .login-box {
-      background: #fff;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
-    }
-    .login-box h1 { color: var(--pink); font-size: 1.6rem; margin-bottom: 0.4rem; }
-    .login-box p  { color: #888; font-size: 0.88rem; margin-bottom: 1.5rem; }
-    .login-box input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1.5px solid #e0c0cc;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-      outline: none;
-      text-align: center;
-      letter-spacing: 0.1em;
-      font-family: inherit;
-    }
-    .login-box input:focus { border-color: var(--pink); }
-    .btn-pink {
-      width: 100%;
-      padding: 0.75rem;
-      background: var(--pink);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.2s;
-    }
-    .btn-pink:hover { background: #a84f6e; }
-    #login-error { color: #c0607f; font-size: 0.88rem; margin-top: 0.75rem; min-height: 1.2em; }
-    #admin-screen { display: none; }
-    .admin-header {
-      background: var(--pink);
-      color: #fff;
-      padding: 1rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .admin-header h1 { font-size: 1.2rem; }
-    .btn-logout {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.4);
-      border-radius: 6px;
-      padding: 0.4rem 0.9rem;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-family: inherit;
-    }
-    .tabs {
-      display: flex;
-      gap: 0;
-      background: #fff;
-      border-bottom: 2px solid var(--pink-mid);
-      padding: 0 1.5rem;
-    }
-    .tab-btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      background: none;
-      font-size: 0.95rem;
-      font-family: inherit;
-      cursor: pointer;
-      color: #888;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -2px;
-      font-weight: 600;
-    }
-    .tab-btn.active { color: var(--pink); border-bottom-color: var(--pink); }
-    .tab-content { display: none; padding: 1.5rem; }
-    .tab-content.active { display: block; }
-    .stats-bar { display: flex; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
-    .stat-pill {
-      background: #fff;
-      border: 1.5px solid var(--pink-mid);
-      border-radius: 20px;
-      padding: 0.35rem 1rem;
-      font-size: 0.85rem;
-      color: var(--pink);
-      font-weight: 600;
-    }
-    .search-bar { margin-bottom: 1rem; }
-    .search-bar input {
-      width: 100%;
-      max-width: 360px;
-      padding: 0.55rem 0.9rem;
-      border: 1.5px solid #e0c0cc;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-family: inherit;
-      outline: none;
-    }
-    .search-bar input:focus { border-color: var(--pink); }
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      font-size: 0.88rem;
-    }
-    .data-table th {
-      background: var(--pink);
-      color: #fff;
-      padding: 0.7rem 0.8rem;
-      text-align: right;
-      font-weight: 600;
-    }
-    .data-table td {
-      padding: 0.65rem 0.8rem;
-      border-bottom: 1px solid #f3e0e8;
-      vertical-align: top;
-      max-width: 200px;
-      word-break: break-word;
-    }
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table tr:hover td { background: #fff8fb; }
-    .btn-del {
-      background: #fff;
-      color: #c0607f;
-      border: 1.5px solid #c0607f;
-      border-radius: 6px;
-      padding: 0.3rem 0.7rem;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-family: inherit;
-      white-space: nowrap;
-      transition: background 0.15s, color 0.15s;
-    }
-    .btn-del:hover { background: #c0607f; color: #fff; }
-    .loading { text-align:center; padding: 2rem; color: #aaa; }
-    .empty   { text-align:center; padding: 2rem; color: #bbb; font-size: 0.95rem; }
-    .img-thumb {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 6px;
-      cursor: zoom-in;
-    }
-    #lb {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      cursor: zoom-out;
-    }
-    #lb img { max-width: 90vw; max-height: 90vh; border-radius: 10px; }
+    :root { --pink:#c0607f; --pink-light:#fff0f6; --pink-mid:#f7ccd8; --radius:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:var(--pink-light); min-height:100vh; color:#333; direction:rtl; }
+    #login-screen { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .login-box { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:2.5rem 2rem; width:100%; max-width:360px; text-align:center; }
+    .login-box h1 { color:var(--pink); font-size:1.6rem; margin-bottom:0.4rem; }
+    .login-box p  { color:#888; font-size:0.88rem; margin-bottom:1.5rem; }
+    .login-box input { width:100%; padding:0.75rem 1rem; border:1.5px solid #e0c0cc; border-radius:8px; font-size:1rem; margin-bottom:1rem; outline:none; text-align:center; letter-spacing:0.1em; font-family:inherit; }
+    .login-box input:focus { border-color:var(--pink); }
+    .btn-pink { width:100%; padding:0.75rem; background:var(--pink); color:#fff; border:none; border-radius:8px; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit; transition:background 0.2s; }
+    .btn-pink:hover { background:#a84f6e; }
+    #login-error { color:#c0607f; font-size:0.88rem; margin-top:0.75rem; min-height:1.2em; }
+    #admin-screen { display:none; }
+    .admin-header { background:var(--pink); color:#fff; padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
+    .admin-header h1 { font-size:1.2rem; }
+    .btn-logout { background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.4); border-radius:6px; padding:0.4rem 0.9rem; cursor:pointer; font-size:0.85rem; font-family:inherit; }
+    .tabs { display:flex; gap:0; background:#fff; border-bottom:2px solid var(--pink-mid); padding:0 1.5rem; }
+    .tab-btn { padding:0.75rem 1.5rem; border:none; background:none; font-size:0.95rem; font-family:inherit; cursor:pointer; color:#888; border-bottom:3px solid transparent; margin-bottom:-2px; font-weight:600; }
+    .tab-btn.active { color:var(--pink); border-bottom-color:var(--pink); }
+    .tab-content { display:none; padding:1.5rem; }
+    .tab-content.active { display:block; }
+    .stats-bar { display:flex; gap:1rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+    .stat-pill { background:#fff; border:1.5px solid var(--pink-mid); border-radius:20px; padding:0.35rem 1rem; font-size:0.85rem; color:var(--pink); font-weight:600; }
+    .search-bar { margin-bottom:1rem; }
+    .search-bar input { width:100%; max-width:360px; padding:0.55rem 0.9rem; border:1.5px solid #e0c0cc; border-radius:8px; font-size:0.9rem; font-family:inherit; outline:none; }
+    .search-bar input:focus { border-color:var(--pink); }
+    .data-table { width:100%; border-collapse:collapse; background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); font-size:0.88rem; }
+    .data-table th { background:var(--pink); color:#fff; padding:0.7rem 0.8rem; text-align:right; font-weight:600; }
+    .data-table td { padding:0.65rem 0.8rem; border-bottom:1px solid #f3e0e8; vertical-align:top; max-width:200px; word-break:break-word; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:#fff8fb; }
+    .btn-del { background:#fff; color:#c0607f; border:1.5px solid #c0607f; border-radius:6px; padding:0.3rem 0.7rem; cursor:pointer; font-size:0.8rem; font-family:inherit; white-space:nowrap; transition:background 0.15s,color 0.15s; }
+    .btn-del:hover { background:#c0607f; color:#fff; }
+    .loading { text-align:center; padding:2rem; color:#aaa; }
+    .empty   { text-align:center; padding:2rem; color:#bbb; font-size:0.95rem; }
+    .img-thumb { width:50px; height:50px; object-fit:cover; border-radius:6px; cursor:zoom-in; }
+    #lb { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; cursor:zoom-out; }
+    #lb img { max-width:90vw; max-height:90vh; border-radius:10px; }
   </style>
 </head>
 <body>
@@ -213,28 +69,21 @@
   </div>
 
   <div class="tab-content active" id="tab-recs">
-    <div class="stats-bar">
-      <div class="stat-pill" id="stat-recs">טוען...</div>
-    </div>
-    <div class="search-bar">
-      <input type="text" id="search-recs" placeholder="חיפוש לפי קטגוריה, חנות, תיאור..." />
-    </div>
+    <div class="stats-bar"><div class="stat-pill" id="stat-recs">טוען...</div></div>
+    <div class="search-bar"><input type="text" id="search-recs" placeholder="חיפוש לפי קטגוריה, חנות, תיאור..." /></div>
     <div id="recs-container"><div class="loading">טוענת נתונים...</div></div>
   </div>
 
   <div class="tab-content" id="tab-forum">
-    <div class="stats-bar">
-      <div class="stat-pill" id="stat-forum">טוען...</div>
-    </div>
-    <div class="search-bar">
-      <input type="text" id="search-forum" placeholder="חיפוש לפי כותרת או תוכן..." />
-    </div>
+    <div class="stats-bar"><div class="stat-pill" id="stat-forum">טוען...</div></div>
+    <div class="search-bar"><input type="text" id="search-forum" placeholder="חיפוש לפי כותרת או תוכן..." /></div>
     <div id="forum-container"><div class="loading">טוענת נתונים...</div></div>
   </div>
 </div>
 
 <div id="lb"><img id="lb-img" /></div>
 
+<!-- Recommendation edit modal -->
 <div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto">
   <div style="background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.75rem 1.5rem;width:100%;max-width:480px;margin:auto;direction:rtl">
     <h2 style="color:var(--pink);font-size:1.2rem;margin-bottom:1.25rem">&#9998; עריכת המלצה</h2>
@@ -251,21 +100,15 @@
           <select id="edit-cup" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none">
             <option value="D">D</option><option value="DD">DD</option><option value="E">E</option>
             <option value="F">F</option><option value="G">G</option><option value="H">H</option>
-            <option value="I">I</option><option value="J">J</option><option value="K">K</option>
-            <option value="L">L</option>
+            <option value="I">I</option><option value="J">J</option><option value="K">K</option><option value="L">L</option>
           </select>
         </div>
       </div>
       <div style="margin-bottom:0.75rem">
         <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">קטגוריה</label>
         <select id="edit-category" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none">
-          <option value="חולצות וגופיות">חולצות וגופיות</option>
-          <option value="גוזיות וחולצות ספורט">גוזיות וחולצות ספורט</option>
-          <option value="חזיות">חזיות</option>
-          <option value="שמלות ערב">שמלות ערב</option>
-          <option value="שמלות כלה">שמלות כלה</option>
-          <option value="בגד ים">בגד ים</option>
-          <option value="אחר">אחר</option>
+          <option>חולצות וגופיות</option><option>גוזיות וחולצות ספורט</option><option>חזיות</option>
+          <option>שמלות ערב</option><option>שמלות כלה</option><option>בגד ים</option><option>אחר</option>
         </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
@@ -283,23 +126,51 @@
         <textarea id="edit-description" rows="3" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none;resize:vertical;min-height:70px"></textarea>
       </div>
       <div style="margin-bottom:0.75rem">
-        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;color:#555">מאפיינים מיוחדים</label>
+        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;color:#555">מאפיינים</label>
         <div style="display:flex;gap:1rem;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.88rem;cursor:pointer">
-            <input type="checkbox" name="edit-features" value="פתוח/חשוף" style="accent-color:var(--pink);width:16px;height:16px" /> פתוח/חשוף
-          </label>
-          <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.88rem;cursor:pointer">
-            <input type="checkbox" name="edit-features" value="מחזיק במיוחד" style="accent-color:var(--pink);width:16px;height:16px" /> מחזיק במיוחד
-          </label>
+          <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.88rem;cursor:pointer"><input type="checkbox" name="edit-features" value="פתוח/חשוף" style="accent-color:var(--pink);width:16px;height:16px" /> פתוח/חשוף</label>
+          <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.88rem;cursor:pointer"><input type="checkbox" name="edit-features" value="מחזיק במיוחד" style="accent-color:var(--pink);width:16px;height:16px" /> מחזיק במיוחד</label>
         </div>
       </div>
       <div style="margin-bottom:1.25rem">
         <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;cursor:pointer;font-weight:600">
-          <input type="checkbox" id="edit-anonymous" style="accent-color:var(--pink);width:16px;height:16px" /> העלאה בעילום שם (אנונימי)
+          <input type="checkbox" id="edit-anonymous" style="accent-color:var(--pink);width:16px;height:16px" /> אנונימי
         </label>
       </div>
       <div style="display:flex;gap:0.6rem;justify-content:flex-end">
         <button type="button" id="edit-cancel" style="padding:0.6rem 1.2rem;background:#fff;border:1.5px solid #ccc;border-radius:8px;font-family:inherit;font-size:0.9rem;cursor:pointer;color:#666">ביטול</button>
+        <button type="submit" class="btn-pink" style="width:auto;padding:0.6rem 1.4rem;font-size:0.9rem">&#128190; שמור שינויים</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Forum post edit modal -->
+<div id="forum-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto">
+  <div style="background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.75rem 1.5rem;width:100%;max-width:480px;margin:auto;direction:rtl">
+    <h2 style="color:var(--pink);font-size:1.2rem;margin-bottom:1.25rem">&#9998; עריכת פוסט פורום</h2>
+    <div id="forum-edit-alert" style="display:none;padding:0.6rem 1rem;border-radius:8px;font-size:0.9rem;margin-bottom:1rem"></div>
+    <form id="forum-edit-form">
+      <input type="hidden" id="forum-edit-id" />
+      <div style="margin-bottom:0.75rem">
+        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">כותרת</label>
+        <input type="text" id="forum-edit-title" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none" required />
+      </div>
+      <div style="margin-bottom:0.75rem">
+        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">תוכן</label>
+        <textarea id="forum-edit-body" rows="4" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none;resize:vertical;min-height:90px" required></textarea>
+      </div>
+      <div style="margin-bottom:0.75rem">
+        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;cursor:pointer;font-weight:600">
+          <input type="checkbox" id="forum-edit-anon" style="accent-color:var(--pink);width:16px;height:16px" /> פרסום בעילום שם
+        </label>
+      </div>
+      <div id="forum-edit-name-wrap" style="margin-bottom:1.25rem">
+        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;color:#555">שם תצוגה</label>
+        <input type="text" id="forum-edit-name" style="width:100%;padding:0.6rem 0.75rem;border:1.5px solid #e0c0cc;border-radius:8px;font-family:inherit;font-size:0.9rem;background:#fafafa;outline:none" placeholder="השם שיוצג..." />
+      </div>
+      <div style="display:flex;gap:0.6rem;justify-content:flex-end">
+        <button type="button" id="forum-edit-cancel" style="padding:0.6rem 1.2rem;background:#fff;border:1.5px solid #ccc;border-radius:8px;font-family:inherit;font-size:0.9rem;cursor:pointer;color:#666">ביטול</button>
         <button type="submit" class="btn-pink" style="width:auto;padding:0.6rem 1.4rem;font-size:0.9rem">&#128190; שמור שינויים</button>
       </div>
     </form>
@@ -341,9 +212,7 @@
         adminPwd = pwd;
         sessionStorage.setItem(SESSION_KEY, pwd);
         showAdminPanel();
-      } else {
-        loginErr.textContent = 'סיסמה שגויה';
-      }
+      } else { loginErr.textContent = 'סיסמה שגויה'; }
     })
     .catch(function() { loginErr.textContent = 'שגיאת שרת, נסי שוב'; });
   }
@@ -373,6 +242,7 @@
     return { 'Content-Type': 'application/json', 'x-admin-password': adminPwd };
   }
 
+  // --- RECOMMENDATIONS ---
   function loadRecs() {
     document.getElementById('recs-container').innerHTML = '<div class="loading">טוענת...</div>';
     fetch('/api/admin/data/recommendations', { headers: adminHeaders() })
@@ -382,51 +252,38 @@
       document.getElementById('stat-recs').textContent = 'סה"כ ' + allRecs.length + ' המלצות';
       renderRecs(allRecs);
     })
-    .catch(function() {
-      document.getElementById('recs-container').innerHTML = '<div class="empty">שגיאה בטעינת נתונים</div>';
-    });
+    .catch(function() { document.getElementById('recs-container').innerHTML = '<div class="empty">שגיאה בטעינת נתונים</div>'; });
   }
 
   document.getElementById('search-recs').addEventListener('input', function() {
     var q = this.value.toLowerCase();
     renderRecs(allRecs.filter(function(r) {
-      return (r.category||'').toLowerCase().includes(q) ||
-             (r.store||'').toLowerCase().includes(q) ||
-             (r.description||'').toLowerCase().includes(q) ||
-             (r.link||'').toLowerCase().includes(q);
+      return (r.category||'').toLowerCase().includes(q) || (r.store||'').toLowerCase().includes(q) ||
+             (r.description||'').toLowerCase().includes(q) || (r.link||'').toLowerCase().includes(q);
     }));
   });
 
   function renderRecs(recs) {
     var c = document.getElementById('recs-container');
     if (!recs.length) { c.innerHTML = '<div class="empty">אין המלצות להצגה</div>'; return; }
-
     var html = '<div style="overflow-x:auto"><table class="data-table"><thead><tr>' +
-      '<th>תאריך</th><th>קטגוריה</th><th>היקף</th><th>קאפ</th>' +
-      '<th>חנות</th><th>קישור</th><th>תיאור</th><th>תמונה</th><th>אנונימי</th><th>פעולות</th>' +
+      '<th>תאריך</th><th>קטגוריה</th><th>היקף</th><th>קאפ</th><th>חנות</th><th>קישור</th><th>תיאור</th><th>תמונה</th><th>אנונימי</th><th>פעולות</th>' +
       '</tr></thead><tbody>';
-
     recs.forEach(function(r) {
       var date = new Date(r.createdAt).toLocaleDateString('he-IL');
       var imgCell = r.imageUrl ? '<img class="img-thumb" src="' + esc(r.imageUrl) + '" data-src="' + esc(r.imageUrl) + '" />' : '&mdash;';
       var link = r.link ? '<a href="' + esc(r.link) + '" target="_blank" rel="noopener" style="color:#c0607f">קישור</a>' : '&mdash;';
       var recJson = encodeURIComponent(JSON.stringify(r));
       html += '<tr>' +
-        '<td>' + date + '</td>' +
-        '<td>' + esc(r.category) + '</td>' +
-        '<td>' + r.circumference + '</td>' +
-        '<td>' + esc(r.cup) + '</td>' +
-        '<td>' + esc(r.store||'&mdash;') + '</td>' +
-        '<td>' + link + '</td>' +
-        '<td style="max-width:180px">' + esc(r.description||'&mdash;') + '</td>' +
-        '<td>' + imgCell + '</td>' +
-        '<td>' + (r.isAnonymous ? 'כן' : 'לא') + '</td>' +
+        '<td>' + date + '</td><td>' + esc(r.category) + '</td><td>' + r.circumference + '</td><td>' + esc(r.cup) + '</td>' +
+        '<td>' + esc(r.store||'') + '</td><td>' + link + '</td>' +
+        '<td style="max-width:180px">' + esc(r.description||'') + '</td>' +
+        '<td>' + imgCell + '</td><td>' + (r.isAnonymous ? 'כן' : 'לא') + '</td>' +
         '<td style="white-space:nowrap">' +
           '<button class="btn-edit" data-rec="' + recJson + '" style="background:#fff;color:var(--pink);border:1.5px solid var(--pink);border-radius:6px;padding:0.3rem 0.7rem;cursor:pointer;font-size:0.8rem;font-family:inherit;margin-left:0.3rem">&#9998; ערוך</button>' +
           '<button class="btn-del" data-type="recommendation" data-id="' + r._id + '">&#128465; מחק</button>' +
         '</td></tr>';
     });
-
     html += '</tbody></table></div>';
     c.innerHTML = html;
     bindImageClicks(c);
@@ -434,6 +291,7 @@
     bindEditButtons(c);
   }
 
+  // --- FORUM ---
   function loadForum() {
     document.getElementById('forum-container').innerHTML = '<div class="loading">טוענת...</div>';
     fetch('/api/admin/data/forum', { headers: adminHeaders() })
@@ -443,16 +301,13 @@
       document.getElementById('stat-forum').textContent = 'סה"כ ' + allPosts.length + ' פוסטים';
       renderForum(allPosts);
     })
-    .catch(function() {
-      document.getElementById('forum-container').innerHTML = '<div class="empty">שגיאה בטעינת נתונים</div>';
-    });
+    .catch(function() { document.getElementById('forum-container').innerHTML = '<div class="empty">שגיאה בטעינת נתונים</div>'; });
   }
 
   document.getElementById('search-forum').addEventListener('input', function() {
     var q = this.value.toLowerCase();
     renderForum(allPosts.filter(function(p) {
-      return (p.title||'').toLowerCase().includes(q) ||
-             (p.body||'').toLowerCase().includes(q) ||
+      return (p.title||'').toLowerCase().includes(q) || (p.body||'').toLowerCase().includes(q) ||
              (p.displayName||'').toLowerCase().includes(q);
     }));
   });
@@ -460,31 +315,33 @@
   function renderForum(posts) {
     var c = document.getElementById('forum-container');
     if (!posts.length) { c.innerHTML = '<div class="empty">אין פוסטים להצגה</div>'; return; }
-
     var html = '<div style="overflow-x:auto"><table class="data-table"><thead><tr>' +
-      '<th>תאריך</th><th>כותרת</th><th>תוכן</th><th>מחבר</th><th>תגובות</th><th>תמונה</th><th>מחיקה</th>' +
+      '<th>תאריך</th><th>כותרת</th><th>תוכן</th><th>מחבר</th><th>תגובות</th><th>תמונה</th><th>פעולות</th>' +
       '</tr></thead><tbody>';
-
     posts.forEach(function(p) {
       var date = new Date(p.createdAt).toLocaleDateString('he-IL');
       var imgCell = p.imageUrl ? '<img class="img-thumb" src="' + esc(p.imageUrl) + '" data-src="' + esc(p.imageUrl) + '" />' : '&mdash;';
+      var postJson = encodeURIComponent(JSON.stringify(p));
       html += '<tr>' +
         '<td>' + date + '</td>' +
-        '<td style="font-weight:600">' + esc(p.title) + '</td>' +
+        '<td style="font-weight:600;max-width:160px">' + esc(p.title) + '</td>' +
         '<td style="max-width:220px">' + esc(p.body) + '</td>' +
         '<td>' + esc(p.displayName||'אנונימית') + '</td>' +
         '<td>' + (p.replies||[]).length + '</td>' +
         '<td>' + imgCell + '</td>' +
-        '<td><button class="btn-del" data-type="forum" data-id="' + p._id + '">&#128465; מחק</button></td>' +
-        '</tr>';
+        '<td style="white-space:nowrap">' +
+          '<button class="btn-edit-forum" data-post="' + postJson + '" style="background:#fff;color:var(--pink);border:1.5px solid var(--pink);border-radius:6px;padding:0.3rem 0.7rem;cursor:pointer;font-size:0.8rem;font-family:inherit;margin-left:0.3rem">&#9998; ערוך</button>' +
+          '<button class="btn-del" data-type="forum" data-id="' + p._id + '">&#128465; מחק</button>' +
+        '</td></tr>';
     });
-
     html += '</tbody></table></div>';
     c.innerHTML = html;
     bindImageClicks(c);
     bindDeleteButtons(c, loadForum);
+    bindForumEditButtons(c);
   }
 
+  // --- SHARED ---
   function bindImageClicks(container) {
     container.querySelectorAll('.img-thumb').forEach(function(img) {
       img.addEventListener('click', function() { openLb(img.dataset.src); });
@@ -495,20 +352,13 @@
     container.querySelectorAll('.btn-del').forEach(function(btn) {
       btn.addEventListener('click', function() {
         if (!confirm('למחוק פריט זה?')) return;
-        var type = btn.dataset.type;
-        var id = btn.dataset.id;
-        fetch('/api/admin/data/' + type + '/' + id, {
-          method: 'DELETE',
-          headers: adminHeaders()
+        fetch('/api/admin/data/' + btn.dataset.type + '/' + btn.dataset.id, {
+          method: 'DELETE', headers: adminHeaders()
         })
         .then(function(res) { return res.json(); })
         .then(function(data) {
-          if (data.success) {
-            btn.closest('tr').style.opacity = '0.3';
-            setTimeout(reloadFn, 400);
-          } else {
-            alert('שגיאה במחיקה: ' + data.message);
-          }
+          if (data.success) { btn.closest('tr').style.opacity = '0.3'; setTimeout(reloadFn, 400); }
+          else alert('שגיאה במחיקה: ' + data.message);
         })
         .catch(function() { alert('שגיאת שרת במחיקה'); });
       });
@@ -519,17 +369,15 @@
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // --- EDIT MODAL ---
+  // --- REC EDIT MODAL ---
   var editModal  = document.getElementById('edit-modal');
   var editForm   = document.getElementById('edit-form');
   var editAlert  = document.getElementById('edit-alert');
   var editCancel = document.getElementById('edit-cancel');
-
   var editCircSel = document.getElementById('edit-circumference');
   for (var v = 60; v <= 150; v += 5) {
     var opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = v + ' ס"מ';
+    opt.value = v; opt.textContent = v + ' ס"מ';
     editCircSel.appendChild(opt);
   }
 
@@ -545,25 +393,19 @@
     document.querySelectorAll('input[name="edit-features"]').forEach(function(cb) {
       cb.checked = (rec.features || []).includes(cb.value);
     });
-    hideEditAlert();
+    editAlert.style.display = 'none';
     editModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
 
-  function closeEditModal() {
-    editModal.style.display = 'none';
-    document.body.style.overflow = '';
-  }
+  function closeEditModal() { editModal.style.display = 'none'; document.body.style.overflow = ''; }
 
   function showEditAlert(msg, isError) {
-    editAlert.textContent = msg;
-    editAlert.style.display = 'block';
+    editAlert.textContent = msg; editAlert.style.display = 'block';
     editAlert.style.background = isError ? '#ffebee' : '#e8f5e9';
-    editAlert.style.color = isError ? '#c62828' : '#2e7d32';
-    editAlert.style.border = '1px solid ' + (isError ? '#ef9a9a' : '#a5d6a7');
+    editAlert.style.color      = isError ? '#c62828' : '#2e7d32';
+    editAlert.style.border     = '1px solid ' + (isError ? '#ef9a9a' : '#a5d6a7');
   }
-
-  function hideEditAlert() { editAlert.style.display = 'none'; }
 
   editCancel.addEventListener('click', closeEditModal);
   editModal.addEventListener('click', function(e) { if (e.target === editModal) closeEditModal(); });
@@ -584,21 +426,14 @@
       isAnonymous: document.getElementById('edit-anonymous').checked
     };
     var saveBtn = editForm.querySelector('[type="submit"]');
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'שומר...';
+    saveBtn.disabled = true; saveBtn.textContent = 'שומר...';
     fetch('/api/admin/data/recommendation/' + id, {
-      method: 'PUT',
-      headers: adminHeaders(),
-      body: JSON.stringify(payload)
+      method: 'PUT', headers: adminHeaders(), body: JSON.stringify(payload)
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
-      if (data.success) {
-        showEditAlert('ההמלצה עודכנה בהצלחה', false);
-        setTimeout(function() { closeEditModal(); loadRecs(); }, 900);
-      } else {
-        showEditAlert('שגיאה: ' + data.message, true);
-      }
+      if (data.success) { showEditAlert('ההמלצה עודכנה בהצלחה', false); setTimeout(function() { closeEditModal(); loadRecs(); }, 900); }
+      else showEditAlert('שגיאה: ' + data.message, true);
     })
     .catch(function() { showEditAlert('שגיאת שרת, נסי שוב', true); })
     .finally(function() { saveBtn.disabled = false; saveBtn.textContent = 'שמור שינויים'; });
@@ -607,12 +442,84 @@
   function bindEditButtons(container) {
     container.querySelectorAll('.btn-edit').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        try {
-          var rec = JSON.parse(decodeURIComponent(btn.dataset.rec));
-          openEditModal(rec);
-        } catch(err) {
-          alert('שגיאה בפתיחת הטופס');
-        }
+        try { openEditModal(JSON.parse(decodeURIComponent(btn.dataset.rec))); }
+        catch(err) { alert('שגיאה בפתיחת הטופס'); }
+      });
+    });
+  }
+
+  // --- FORUM EDIT MODAL ---
+  var forumEditModal  = document.getElementById('forum-edit-modal');
+  var forumEditForm   = document.getElementById('forum-edit-form');
+  var forumEditAlert  = document.getElementById('forum-edit-alert');
+  var forumEditCancel = document.getElementById('forum-edit-cancel');
+
+  function openForumEditModal(post) {
+    document.getElementById('forum-edit-id').value    = post._id;
+    document.getElementById('forum-edit-title').value = post.title || '';
+    document.getElementById('forum-edit-body').value  = post.body  || '';
+    document.getElementById('forum-edit-anon').checked = !!post.isAnonymous;
+    document.getElementById('forum-edit-name').value  = post.isAnonymous ? '' : (post.displayName || '');
+    toggleForumNameField();
+    forumEditAlert.style.display = 'none';
+    forumEditModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeForumEditModal() { forumEditModal.style.display = 'none'; document.body.style.overflow = ''; }
+
+  function toggleForumNameField() {
+    var wrap = document.getElementById('forum-edit-name-wrap');
+    if (wrap) wrap.style.display = document.getElementById('forum-edit-anon').checked ? 'none' : 'block';
+  }
+
+  document.getElementById('forum-edit-anon').addEventListener('change', toggleForumNameField);
+  forumEditCancel.addEventListener('click', closeForumEditModal);
+  forumEditModal.addEventListener('click', function(e) { if (e.target === forumEditModal) closeForumEditModal(); });
+
+  forumEditForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var id     = document.getElementById('forum-edit-id').value;
+    var isAnon = document.getElementById('forum-edit-anon').checked;
+    var payload = {
+      title:       document.getElementById('forum-edit-title').value.trim(),
+      body:        document.getElementById('forum-edit-body').value.trim(),
+      displayName: isAnon ? 'אנונימית' : document.getElementById('forum-edit-name').value.trim(),
+      isAnonymous: isAnon
+    };
+    if (!payload.title || !payload.body) {
+      forumEditAlert.textContent = 'כותרת ותוכן הם שדות חובה';
+      forumEditAlert.style.cssText = 'display:block;padding:0.6rem 1rem;border-radius:8px;font-size:0.9rem;background:#ffebee;color:#c62828;border:1px solid #ef9a9a';
+      return;
+    }
+    var saveBtn = forumEditForm.querySelector('[type="submit"]');
+    saveBtn.disabled = true; saveBtn.textContent = 'שומר...';
+    fetch('/api/admin/data/forum/' + id, {
+      method: 'PUT', headers: adminHeaders(), body: JSON.stringify(payload)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        forumEditAlert.textContent = 'הפוסט עודכן בהצלחה';
+        forumEditAlert.style.cssText = 'display:block;padding:0.6rem 1rem;border-radius:8px;font-size:0.9rem;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7';
+        setTimeout(function() { closeForumEditModal(); loadForum(); }, 900);
+      } else {
+        forumEditAlert.textContent = 'שגיאה: ' + data.message;
+        forumEditAlert.style.cssText = 'display:block;padding:0.6rem 1rem;border-radius:8px;font-size:0.9rem;background:#ffebee;color:#c62828;border:1px solid #ef9a9a';
+      }
+    })
+    .catch(function() {
+      forumEditAlert.textContent = 'שגיאת שרת, נסי שוב';
+      forumEditAlert.style.display = 'block';
+    })
+    .finally(function() { saveBtn.disabled = false; saveBtn.textContent = 'שמור שינויים'; });
+  });
+
+  function bindForumEditButtons(container) {
+    container.querySelectorAll('.btn-edit-forum').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        try { openForumEditModal(JSON.parse(decodeURIComponent(btn.dataset.post))); }
+        catch(err) { alert('שגיאה בפתיחת הטופס'); }
       });
     });
   }
