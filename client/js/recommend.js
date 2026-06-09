@@ -3,86 +3,91 @@
    ============================================= */
 
 (function () {
-  // Populate circumference dropdown
-  const circumferenceSel = document.getElementById('circumference');
+  // Populate circumference dropdown (60–150 in steps of 5)
+  var circumferenceSel = document.getElementById('circumference');
   if (circumferenceSel) {
-    for (let v = 60; v <= 150; v += 5) {
-      const opt = document.createElement('option');
+    for (var v = 60; v <= 150; v += 5) {
+      var opt = document.createElement('option');
       opt.value = v;
-      opt.textContent = `${v} ס"מ`;
+      opt.textContent = v + ' ס"מ';
       circumferenceSel.appendChild(opt);
     }
   }
 
   // ============ CANVAS BLUR TOOL ============
-  const imageInput = document.getElementById('image-input');
-  const canvasWrap = document.getElementById('canvas-wrap');
-  const canvas = document.getElementById('imageCanvas');
-  const ctx = canvas ? canvas.getContext('2d') : null;
+  var imageInput  = document.getElementById('image-input');
+  var canvasWrap  = document.getElementById('canvas-wrap');
+  var canvas      = document.getElementById('imageCanvas');
+  var ctx         = canvas ? canvas.getContext('2d') : null;
 
-  // Two offscreen canvases:
-  //  origCanvas  — the untouched original image, never modified
-  //  blurCanvas  — accumulates blur strokes; source of truth for export
-  let origCanvas = null;
-  let blurCanvas = null;
-  let isDrawing = false;
+  // origCanvas — untouched original, never modified
+  // blurCanvas — accumulates blur strokes; exported on submit
+  var origCanvas = null;
+  var blurCanvas = null;
+  var isDrawing  = false;
 
   function makeOffscreen(w, h) {
-    const c = document.createElement('canvas');
+    var c = document.createElement('canvas');
     c.width = w; c.height = h;
     return c;
   }
 
   function getBrushSize() {
-    return parseInt(document.getElementById('brush-size')?.value || 30);
+    var el = document.getElementById('brush-size');
+    return parseInt(el ? el.value : 30) || 30;
   }
 
-  // Draw blurCanvas → visible canvas, plus optional brush-circle cursor
+  // Copy blurCanvas to visible canvas, optionally draw brush cursor
   function renderCanvas(showCursor, cx, cy) {
     if (!ctx || !blurCanvas) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(blurCanvas, 0, 0);
     if (showCursor) {
-      const r = getBrushSize();
+      var r = getBrushSize();
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(231,84,128,0.85)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(231,84,128,0.9)';
+      ctx.lineWidth = 2.5;
       ctx.setLineDash([5, 4]);
       ctx.stroke();
       ctx.setLineDash([]);
+      // Fill semi-transparent to make it more visible on touch
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(231,84,128,0.08)';
+      ctx.fill();
     }
   }
 
-  // Blur a circular patch on blurCanvas reading pixels from origCanvas,
-  // so (a) only the stroked area blurs and (b) there is no self-referential bleed.
+  // Blur a circular region on blurCanvas, reading pixels from origCanvas.
+  // Using origCanvas as source prevents self-referential blur bleed.
   function applyBlurAt(x, y) {
     if (!origCanvas || !blurCanvas) return;
-    const r = getBrushSize();
-    const blurPx = 14;
-    const pad = blurPx * 3; // extra padding so the blur kernel doesn't bleed at the edges
+    var r      = getBrushSize();
+    var blurPx = 14;
+    var pad    = blurPx * 3;
 
-    const bx = Math.max(0, Math.floor(x - r));
-    const by = Math.max(0, Math.floor(y - r));
-    const bw = Math.min(r * 2, blurCanvas.width - bx);
-    const bh = Math.min(r * 2, blurCanvas.height - by);
+    var bx = Math.max(0, Math.floor(x - r));
+    var by = Math.max(0, Math.floor(y - r));
+    var bw = Math.min(r * 2, blurCanvas.width - bx);
+    var bh = Math.min(r * 2, blurCanvas.height - by);
     if (bw <= 0 || bh <= 0) return;
 
-    // Source region (with padding) from original image
-    const sx = Math.max(0, bx - pad);
-    const sy = Math.max(0, by - pad);
-    const sw = Math.min(bw + pad * 2, origCanvas.width - sx);
-    const sh = Math.min(bh + pad * 2, origCanvas.height - sy);
+    // Padded source region from original image
+    var sx = Math.max(0, bx - pad);
+    var sy = Math.max(0, by - pad);
+    var sw = Math.min(bw + pad * 2, origCanvas.width  - sx);
+    var sh = Math.min(bh + pad * 2, origCanvas.height - sy);
 
-    // Render blurred source into a temp canvas
-    const tmp = makeOffscreen(sw, sh);
-    const tCtx = tmp.getContext('2d');
-    tCtx.filter = `blur(${blurPx}px)`;
+    // Blur the padded patch in a temp canvas
+    var tmp  = makeOffscreen(sw, sh);
+    var tCtx = tmp.getContext('2d');
+    tCtx.filter = 'blur(' + blurPx + 'px)';
     tCtx.drawImage(origCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
     tCtx.filter = 'none';
 
-    // Clip the blurred result to the circular brush shape, then stamp onto blurCanvas
-    const bCtx = blurCanvas.getContext('2d');
+    // Stamp only the circular brush area onto blurCanvas
+    var bCtx = blurCanvas.getContext('2d');
     bCtx.save();
     bCtx.beginPath();
     bCtx.arc(x, y, r, 0, Math.PI * 2);
@@ -91,32 +96,39 @@
     bCtx.restore();
   }
 
+  // Returns touch/mouse position in canvas pixel coordinates.
+  // NOTE: canvas.width == CSS width (no DPR scaling) so scaleX == 1,
+  // which means coordinates map directly regardless of devicePixelRatio.
   function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    var rect   = canvas.getBoundingClientRect();
+    var scaleX = canvas.width  / rect.width;
+    var scaleY = canvas.height / rect.height;
+    var src    = e.touches ? e.touches[0] : e;
     return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY
+      x: (src.clientX - rect.left) * scaleX,
+      y: (src.clientY - rect.top)  * scaleY
     };
   }
 
   if (imageInput) {
-    imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
+    imageInput.addEventListener('change', function(e) {
+      var file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => {
-          const maxW = Math.min(window.innerWidth - 60, 560);
-          const scale = Math.min(maxW / img.width, 400 / img.height, 1);
-          const w = Math.round(img.width * scale);
-          const h = Math.round(img.height * scale);
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        var img = new Image();
+        img.onload = function() {
+          var maxW  = Math.min(window.innerWidth - 60, 560);
+          var scale = Math.min(maxW / img.width, 400 / img.height, 1);
+          var w     = Math.round(img.width  * scale);
+          var h     = Math.round(img.height * scale);
 
-          canvas.width = w; canvas.height = h;
+          // Set canvas to logical pixel size (no DPR multiplication).
+          // This keeps coordinate systems consistent across all devices.
+          canvas.width  = w;
+          canvas.height = h;
+          canvas.style.width  = '';
+          canvas.style.height = '';
 
           origCanvas = makeOffscreen(w, h);
           origCanvas.getContext('2d').drawImage(img, 0, 0, w, h);
@@ -134,72 +146,140 @@
   }
 
   if (canvas) {
-    canvas.addEventListener('mousedown', (e) => {
+    canvas.addEventListener('mousedown', function(e) {
       isDrawing = true;
-      const p = getPos(e);
+      var p = getPos(e);
       applyBlurAt(p.x, p.y);
       renderCanvas(true, p.x, p.y);
     });
-    canvas.addEventListener('mousemove', (e) => {
-      const p = getPos(e);
+    canvas.addEventListener('mousemove', function(e) {
+      var p = getPos(e);
       if (isDrawing) applyBlurAt(p.x, p.y);
       renderCanvas(true, p.x, p.y);
     });
-    canvas.addEventListener('mouseup', () => { isDrawing = false; renderCanvas(false); });
-    canvas.addEventListener('mouseleave', () => { isDrawing = false; renderCanvas(false); });
+    canvas.addEventListener('mouseup', function() { isDrawing = false; renderCanvas(false); });
+    canvas.addEventListener('mouseleave', function() { isDrawing = false; renderCanvas(false); });
 
-    canvas.addEventListener('touchstart', (e) => {
+    canvas.addEventListener('touchstart', function(e) {
       e.preventDefault();
       isDrawing = true;
-      const p = getPos(e);
+      var p = getPos(e);
       applyBlurAt(p.x, p.y);
       renderCanvas(true, p.x, p.y);
     }, { passive: false });
-    canvas.addEventListener('touchmove', (e) => {
+    canvas.addEventListener('touchmove', function(e) {
       e.preventDefault();
-      const p = getPos(e);
+      var p = getPos(e);
       if (isDrawing) applyBlurAt(p.x, p.y);
       renderCanvas(true, p.x, p.y);
     }, { passive: false });
-    canvas.addEventListener('touchend', () => { isDrawing = false; renderCanvas(false); });
+    canvas.addEventListener('touchend', function() { isDrawing = false; renderCanvas(false); });
   }
 
-  const btnReset = document.getElementById('btn-reset-canvas');
+  var btnReset = document.getElementById('btn-reset-canvas');
   if (btnReset && canvas && ctx) {
-    btnReset.addEventListener('click', () => {
+    btnReset.addEventListener('click', function() {
       if (origCanvas && blurCanvas) {
-        blurCanvas.getContext('2d').clearRect(0, 0, blurCanvas.width, blurCanvas.height);
-        blurCanvas.getContext('2d').drawImage(origCanvas, 0, 0);
+        var bCtx = blurCanvas.getContext('2d');
+        bCtx.clearRect(0, 0, blurCanvas.width, blurCanvas.height);
+        bCtx.drawImage(origCanvas, 0, 0);
         renderCanvas(false);
       }
     });
   }
 
   // ============ FORM SUBMIT ============
-  const form = document.getElementById('recommend-form');
+  var form = document.getElementById('recommend-form');
   if (form) {
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
-      const alertEl = document.getElementById('alert-msg');
+      var alertEl = document.getElementById('alert-msg');
       showAlert(alertEl, '', '');
 
-      const circumference = document.getElementById('circumference').value;
-      const cup = document.getElementById('cup').value;
-      const category = document.getElementById('category').value;
+      var circumference = document.getElementById('circumference').value;
+      var cup           = document.getElementById('cup').value;
+      var category      = document.getElementById('category').value;
 
       if (!circumference || !cup || !category) {
         return showAlert(alertEl, 'error', 'יש למלא את כל שדות החובה (היקף, קאפ, קטגוריה)');
       }
 
-      const submitBtn = form.querySelector('[type="submit"]');
+      var submitBtn = form.querySelector('[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'שולחת...';
 
-      try {
-        // Upload image if exists
-        let imageUrl = '';
-        if (blurCanvas && canvasWrap.style.display !== 'none') {
-          try {
-            // Export from blurCanvas (no cursor artifact)
-            const base64 = blurCanvas.toDataURL('image/jpeg', 0.85);
-            const uploadRes = a
+      var features = [];
+      document.querySelectorAll('input[name="features"]:checked').forEach(function(cb) {
+        features.push(cb.value);
+      });
+
+      var payload = {
+        circumference: parseInt(circumference),
+        cup:           cup,
+        category:      category,
+        link:          document.getElementById('link').value.trim(),
+        store:         document.getElementById('store').value.trim(),
+        features:      features,
+        description:   document.getElementById('description').value.trim(),
+        imageUrl:      '',
+        isAnonymous:   document.getElementById('is-anonymous').checked,
+        email:         document.getElementById('email').value.trim()
+      };
+
+      function doSubmit(imageUrl) {
+        payload.imageUrl = imageUrl;
+        fetch('/api/recommendations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.success) {
+            showAlert(alertEl, 'success', 'ההמלצה שלך נשלחה בהצלחה! תודה שחלקת עם הקהילה!');
+            form.reset();
+            canvasWrap.style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            showAlert(alertEl, 'error', data.message || 'שגיאה בשליחה, נסי שוב');
+          }
+        })
+        .catch(function() { showAlert(alertEl, 'error', 'שגיאת שרת. נסי שוב מאוחר יותר.'); })
+        .finally(function() { submitBtn.disabled = false; submitBtn.textContent = 'שלחי המלצה'; });
+      }
+
+      // Upload image if canvas is shown
+      if (blurCanvas && canvasWrap.style.display !== 'none') {
+        var base64 = blurCanvas.toDataURL('image/jpeg', 0.85);
+        fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64, folder: 'mamlicha/recommendations' })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(uploadData) {
+          if (uploadData.success) {
+            doSubmit(uploadData.url);
+          } else {
+            showAlert(alertEl, 'error', 'העלאת התמונה נכשלה: ' + (uploadData.message || 'שגיאה') + ' — ניתן לשלוח ללא תמונה.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'שלחי המלצה';
+          }
+        })
+        .catch(function() {
+          showAlert(alertEl, 'error', 'שגיאה בהעלאת התמונה. בדקי חיבור ונסי שוב.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'שלחי המלצה';
+        });
+      } else {
+        doSubmit('');
+      }
+    });
+  }
+
+  function showAlert(el, type, msg) {
+    if (!el) return;
+    el.className = 'alert' + (type ? ' ' + type + ' show' : '');
+    el.textContent = msg;
+  }
+})();
