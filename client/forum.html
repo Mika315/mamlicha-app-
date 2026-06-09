@@ -24,18 +24,40 @@
       <p>שאלי, ייעצי, שתפי — הפורום שלנו פתוח לכולן. אפשר לפרסם בעילום שם.</p>
     </section>
 
-    <!-- New post form -->
-    <div class="form-card" id="new-post-form-wrap">
-      <h3 style="margin-bottom:1rem">➕ פוסט חדש</h3>
+    <!-- Search bar -->
+    <div class="form-group" style="margin-bottom:1.2rem">
+      <input type="search" id="forum-search" class="form-control"
+        placeholder="🔍 חיפוש בפוסטים..." autocomplete="off" />
+    </div>
+
+    <!-- Posts list -->
+    <div id="forum-loading" class="loading-state" style="display:none">טוענת פוסטים...</div>
+    <div id="forum-posts"></div>
+    <div id="forum-empty" class="empty-state" style="display:none">
+      <div class="emoji">💬</div>
+      <p>לא נמצאו פוסטים.</p>
+    </div>
+
+    <!-- Pagination -->
+    <div id="forum-pagination" style="display:none;text-align:center;margin:1.2rem 0;gap:0.6rem;display:flex;justify-content:center;align-items:center;flex-wrap:wrap">
+      <button id="btn-prev" class="btn btn-outline" style="min-width:80px">הקודם</button>
+      <span id="page-indicator" style="font-size:0.9rem;color:var(--color-muted)"></span>
+      <button id="btn-next" class="btn btn-outline" style="min-width:80px">הבא</button>
+    </div>
+
+    <!-- Add post form -->
+    <div class="form-card" id="new-post-form-wrap" style="margin-top:2rem">
+      <h3 style="margin-bottom:1rem">✍️ שאלי / שתפי</h3>
       <div id="forum-alert" class="alert"></div>
       <form id="forum-post-form">
+
         <div class="form-group">
           <input type="text" class="form-control" id="post-title"
             placeholder="כותרת השאלה / הנושא..." required />
         </div>
         <div class="form-group">
           <textarea class="form-control" id="post-body" rows="3"
-            placeholder="למשל: איפה מוצאים חזיית סטרפלס למידה G שלא נופלת? 😭"></textarea>
+            placeholder="למשל: איפה מוצאים חזיית סטרפלס למידה G שלא נופלת? 😭" required></textarea>
         </div>
 
         <!-- Image upload with blur -->
@@ -60,22 +82,11 @@
           <input type="text" class="form-control" id="post-display-name"
             placeholder="השם שיוצג (אופציונלי)..." />
         </div>
-        <div class="form-group">
-          <input type="email" class="form-control" id="post-email"
-            placeholder="מייל לצורכי אימות בלבד — לא יפורסם 🔒" />
-        </div>
+
         <button type="submit" class="btn btn-primary" style="width:100%">
           💌 פרסמי פוסט
         </button>
       </form>
-    </div>
-
-    <!-- Posts list -->
-    <div id="forum-loading" class="loading-state" style="display:none">טוענת פוסטים...</div>
-    <div id="forum-posts"></div>
-    <div id="forum-empty" class="empty-state" style="display:none">
-      <div class="emoji">💬</div>
-      <p>עדיין אין פוסטים. היי הראשונה לפרסם!</p>
     </div>
 
   </main>
